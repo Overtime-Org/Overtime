@@ -16,14 +16,15 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.overtime"
+      "bundleIdentifier": "ke.co.mungeian"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.overtime"
+      "package": "ke.co.mungeian",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"

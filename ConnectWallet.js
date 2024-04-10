@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import { Text, View, TouchableOpacity, useColorScheme, ActivityIndicator } from "react-native";
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { useWeb3Modal } from '@web3modal/wagmi-react-native'
@@ -10,7 +10,7 @@ function ConnectWallet({connectionprop}) {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
   const { open } = useWeb3Modal()
-  const { address, isDisconnected, isConnecting } = useAccount()
+  const { isDisconnected, isConnecting } = useAccount()
   
   useEffect(() => {
     if (!isConnecting && isDisconnected) {
@@ -26,7 +26,7 @@ function ConnectWallet({connectionprop}) {
       <TouchableOpacity 
         style={{ width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center', opacity: isConnecting ? 0.6 : 1 }}
         onPress={() => open()}
-        disabled={isConnecting}>
+        disabled={isConnecting || !isDisconnected}>
         {isConnecting ?
           <ActivityIndicator size="small" color="white"/>
         : <Text style={{ color: 'white', fontSize: 17, fontFamily: 'Inter', fontWeight: '700' }}>CONNECT WALLET</Text>}

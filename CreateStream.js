@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   TextInput,
@@ -9,8 +9,13 @@ import {
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { useAccount } from 'wagmi'
+import "react-native-get-random-values"
+import "@ethersproject/shims"
+import { ethers } from 'ethers'
+import {celo} from 'viem/chains'
+import { Framework } from '@superfluid-finance/sdk-core'
 
-function FloatingLabelInput({label, value, onchangetext, margintop}) {
+function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype}) {
   const [isFocused, setIsFocused] = useState(false);
 
   const handleFocus = () => setIsFocused(true);
@@ -44,35 +49,80 @@ function FloatingLabelInput({label, value, onchangetext, margintop}) {
         onFocus={handleFocus}
         onBlur={handleBlur}
         value={value}
+        keyboardType={keyboardtype}
       />
     </View>
   );
 }
 
-
-export default function CreateStream({connectionprop}) {
+export default function CreateStream({connectionprop, setdisabled, disabled, setrefreshoutgoing, setcreatingstream, creatingstream}) {
   const [receiver, setReceiver] = useState('');
   const [rate, setRate] = useState('');
-  const [day, setDay] = useState('');
-  const [month, setMonth] = useState('');
-  const [year, setYear] = useState('');
-  const [hour, setHour] = useState('');
-  const [minute, setMinute] = useState('');
 
-  const { address } = useAccount()
+  const { address, connector } = useAccount()
+  const provider = address == undefined ? undefined : connector._provider;
+  const web3Provider = useMemo(
+    () =>
+        provider ? new ethers.providers.Web3Provider(provider, celo.id) : undefined,
+    [provider]
+  )
+
+  async function createflow(receiver, rate) {
+    try {
+      if (provider != undefined) {
+        const sf = await Framework.create({
+          chainId: celo.id,
+          provider: web3Provider
+        });
+        
+        const signer = web3Provider.getSigner();
+        const cusdx = await sf.loadSuperToken("cUSDx");
+        const createflow = cusdx.createFlow({
+          sender: address,
+          receiver: receiver,
+          flowRate: rate
+        });
+        await createflow.exec(signer)
+        .then(() => {
+          setReceiver('');
+        });
+      }
+    }
+    catch (error) {}
+  }
+
   useEffect(() => {
     if (address == undefined) {
       connectionprop(true)
     }
   }, [address])
 
+  useEffect(() => {
+    if (disabled == true) {
+      setcreatingstream(true)
+    }
+  }, [disabled])
+
+  useEffect(() => {
+    if (creatingstream == true) {
+      createflow(receiver, rate)
+    }
+  }, [creatingstream])
+
+  useEffect(() => {
+    if (receiver == '' && creatingstream == true) {
+      setRate('');
+    }
+  }, [receiver])
+
+  useEffect(() => {
+    if (receiver == '' && rate == '' && creatingstream == true) {
+      setrefreshoutgoing(true);
+    }
+  }, [rate])
+
   const receiverChange = (newText) => setReceiver(newText);
   const rateChange = (newText) => setRate(newText);
-  const dayChange = (newText) => setDay(newText);
-  const monthChange = (newText) => setMonth(newText);
-  const yearChange = (newText) => setYear(newText);
-  const hourChange = (newText) => setHour(newText);
-  const minuteChange = (newText) => setMinute(newText);
 
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -83,55 +133,19 @@ export default function CreateStream({connectionprop}) {
         value={receiver}
         onchangetext={receiverChange}
         margintop={18}
+        keyboardtype="default"
       />
       <FloatingLabelInput
-        label="Rate (cUSDx/hr)"
+        label="Rate"
         value={rate}
         onchangetext={rateChange}
         margintop={50}
+        keyboardtype="numeric"
       />
-      <Text style={{fontSize: 14, color: isDarkMode ? Colors.light : Colors.dark, marginTop: 50}}>Stop Time:</Text>
-      <View style={{flexDirection: 'row'}}>
-        <View style={{width: '15%', paddingRight: 2}}>
-          <FloatingLabelInput
-            label="DD"
-            value={day}
-            onchangetext={dayChange}
-          />
-        </View>
-        <Text style={{fontSize: 20, alignSelf: 'flex-end', color: isDarkMode ? Colors.white : Colors.black}}>/</Text>
-        <View style={{width: '15%', paddingHorizontal: 2}}>
-          <FloatingLabelInput
-            label="MM"
-            value={month}
-            onchangetext={monthChange}
-          />
-        </View>
-        <Text style={{fontSize: 20, alignSelf: 'flex-end', color: isDarkMode ? Colors.white : Colors.black}}>/</Text>
-        <View style={{width: '25%', paddingLeft: 2, paddingRight: 8}}>
-          <FloatingLabelInput
-            label="YYYY"
-            value={year}
-            onchangetext={yearChange}
-          />
-        </View>
-        <View style={{width: '15%', paddingLeft: 4, paddingRight: 2}}>
-          <FloatingLabelInput
-            label="hh"
-            value={hour}
-            onchangetext={hourChange}
-          />
-        </View>
-        <Text style={{fontSize: 20, alignSelf: 'flex-end', color: isDarkMode ? Colors.white : Colors.black}}>:</Text>
-        <View style={{width: '15%', paddingHorizontal: 2}}>
-          <FloatingLabelInput
-            label="mm"
-            value={minute}
-            onchangetext={minuteChange}
-          />
-        </View>
-      </View>
-      <TouchableOpacity style={{ marginTop: 75, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+      <TouchableOpacity
+        style={{ marginTop: 75, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+        disabled={disabled}
+        onPress={() => setdisabled(true)}>
         <Text style={{ color: 'white', fontSize: 17, fontFamily: 'Inter', fontWeight: '700' }}>STREAM</Text>
       </TouchableOpacity>
     </ScrollView>
