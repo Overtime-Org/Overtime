@@ -117,7 +117,8 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
 
   useEffect(() => {
     if (receiver == '' && rate == '' && creatingstream == true) {
-      setrefreshoutgoing(true);
+      //setrefreshoutgoing(true);
+      setcreatingstream(false)
     }
   }, [rate])
 

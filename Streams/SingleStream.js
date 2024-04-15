@@ -11,6 +11,7 @@ import {celo} from 'viem/chains'
 import { Framework } from '@superfluid-finance/sdk-core'
 import FlowingBalance from './FlowingBalance';
 import Elapsed from './Elapsed';
+import BalanceTemp from './BalanceTemp';
 
 const SingleStream = ({route, connectionprop, setdeleted_refresh}) => {
   const [deleting, isDeleting] = useState(false);
@@ -54,7 +55,7 @@ const SingleStream = ({route, connectionprop, setdeleted_refresh}) => {
         await deleteflow.exec(signer)
         .then(() => {
           isDeleting(false)
-          setdeleted_refresh(true)
+          //setdeleted_refresh(true)
           navigation.goBack()
         })
       }
@@ -106,7 +107,12 @@ const SingleStream = ({route, connectionprop, setdeleted_refresh}) => {
         </View>
         <View style={{flexDirection: 'row'}}>
           <View style={{ width: width0, alignItems: 'flex-end' }}><Text style={{color: isDarkMode ? Colors.white : "#686C80", fontFamily: 'Rubik', fontSize: 15}}>Streamed:</Text></View>
-          <View style={{ width: width1, alignItems: 'flex-start' }}><FlowingBalance startingBalance={BigInt(route.params.streameduntilupdatedat)} startingBalanceDate={new Date(route.params.updatedattimestamp * 1000)} flowRate={BigInt(route.params.rate)}/></View>
+          {/* <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center' }}><Text style={{color: "#15D828", fontFamily: 'Rubik', marginLeft: 12, fontSize: 15, height: 20}}>{route.params.streamed} cUSDx</Text></View> */}
+          
+          {route.params.type === 'incoming' ?
+          <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center' }}><FlowingBalance startingBalance={BigInt(route.params.streameduntilupdatedat)} startingBalanceDate={new Date(route.params.updatedattimestamp * 1000)} flowRate={BigInt(route.params.rate)}/></View>
+          :
+          <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center' }}><BalanceTemp rate={route.params.rate} updatedattimestamp={route.params.updatedattimestamp} streameduntilupdatedat={route.params.streameduntilupdatedat}/></View>}
         </View>
       </View>
       <View style={{ alignItems: 'center', justifyContent: 'flex-start', flex: 0.4 }}>

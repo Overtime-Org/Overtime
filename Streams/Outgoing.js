@@ -1,5 +1,5 @@
 import React, {useMemo, useState, useEffect} from 'react';
-import { Text, View, FlatList, TouchableOpacity } from "react-native";
+import { Text, View, FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import { useColorScheme } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
@@ -14,6 +14,8 @@ import { Framework } from '@superfluid-finance/sdk-core'
 function Outgoing({refreshoutgoing, setrefreshoutgoing, deleted_refresh, setdeleted_refresh}) {
   const [outgoing, setOutgoing] = useState([]);
   const [rerender, setRerender] = useState(false);
+  const [canrefresh, setCanrefresh] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   //----------------
   useEffect(() => {
     if (rerender == false) {
@@ -23,26 +25,42 @@ function Outgoing({refreshoutgoing, setrefreshoutgoing, deleted_refresh, setdele
   //----------------
 
   //----------------
-  useEffect(() => {
-    if (refreshoutgoing == true) {
-      setOutgoing([]);
-    }
-  }, [refreshoutgoing])
+  // useEffect(() => {
+  //   if (refreshoutgoing == true) {
+  //     setOutgoing([]);
+  //   }
+  // }, [refreshoutgoing])
+  //----------------
+
+  //----------------
+  // useEffect(() => {
+  //   if ((refreshoutgoing == true || deleted_refresh == true) && outgoing.length == 0) {
+  //     flowsinfo();
+  //   }
+  // }, [outgoing])
+  //----------------
+
+  //----------------
+  // useEffect(() => {
+  //   if (deleted_refresh == true) {
+  //     setOutgoing([]);
+  //   }
+  // }, [deleted_refresh])
   //----------------
 
   //----------------
   useEffect(() => {
-    if ((refreshoutgoing == true || deleted_refresh == true) && outgoing.length == 0) {
-      flowsinfo();
+    if (refreshing == true) {
+      setOutgoing([])
+    }
+  }, [refreshing])
+  //----------------
+
+  useEffect(() => {
+    if (refreshing == true && outgoing.length == 0) {
+      flowsinfo()
     }
   }, [outgoing])
-  //----------------
-
-  useEffect(() => {
-    if (deleted_refresh == true) {
-      setOutgoing([]);
-    }
-  }, [deleted_refresh])
   
   const { address, connector } = useAccount()
 
@@ -86,7 +104,9 @@ function Outgoing({refreshoutgoing, setrefreshoutgoing, deleted_refresh, setdele
               elapsed: elapsed/3600,
               started: pageresults.items[i].createdAtTimestamp,
               rate: pageresults.items[i].currentFlowRate,
-              url: pageresults.items[i].flowUpdatedEvents[0].transactionHash
+              url: pageresults.items[i].flowUpdatedEvents[0].transactionHash,
+              updatedattimestamp: pageresults.items[i].updatedAtTimestamp,
+              streameduntilupdatedat: pageresults.items[i].streamedUntilUpdatedAt
             });
           }
           
@@ -95,8 +115,8 @@ function Outgoing({refreshoutgoing, setrefreshoutgoing, deleted_refresh, setdele
               funcnextpage(sf, pageresults.nextPaging)
             }
             else{
-              setdeleted_refresh(false)
-              setrefreshoutgoing(false)
+              setCanrefresh(true)
+              setRefreshing(false)
               setRerender(true)
             }
           }
@@ -126,7 +146,9 @@ function Outgoing({refreshoutgoing, setrefreshoutgoing, deleted_refresh, setdele
           elapsed: elapsed/3600,
           started: pageresults.items[i].createdAtTimestamp,
           rate: pageresults.items[i].currentFlowRate,
-          url: pageresults.items[i].flowUpdatedEvents[0].transactionHash
+          url: pageresults.items[i].flowUpdatedEvents[0].transactionHash,
+          updatedattimestamp: pageresults.items[i].updatedAtTimestamp,
+          streameduntilupdatedat: pageresults.items[i].streamedUntilUpdatedAt
         });
       }
       
@@ -135,8 +157,8 @@ function Outgoing({refreshoutgoing, setrefreshoutgoing, deleted_refresh, setdele
           funcnextpage(sf, pageresults.nextPaging)
         }
         else{
-          setdeleted_refresh(false)
-          setrefreshoutgoing(false)
+          setCanrefresh(true)
+          setRefreshing(false)
           setRerender(true)
         }
       }
@@ -148,6 +170,14 @@ function Outgoing({refreshoutgoing, setrefreshoutgoing, deleted_refresh, setdele
     <>
     <FlatList
       data={outgoing}
+      refreshControl={
+        canrefresh ?
+          <RefreshControl
+            colors={["#15D828"]}
+            refreshing={refreshing}
+            onRefresh={() => setRefreshing(true)}/>
+        : <></>
+      }
       renderItem={({item}) => {
         let namedisplay = item.name.startsWith("0x") ? item.name.substring(0, 6)+"..."+item.name.substring(38) : item.name
         return(
@@ -158,7 +188,7 @@ function Outgoing({refreshoutgoing, setrefreshoutgoing, deleted_refresh, setdele
               flex: 3,
               alignItems: 'center'
             }}
-            onPress={() => navigation.navigate('SingleStream', {type: 'outgoing', name: item.name, elapsed: item.elapsed, streamed: item.streamed, rate: item.rate, started: item.started, url: item.url})}>
+            onPress={() => navigation.navigate('SingleStream', {type: 'outgoing', name: item.name, elapsed: item.elapsed, streamed: item.streamed, rate: item.rate, started: item.started, url: item.url, updatedattimestamp: item.updatedattimestamp, streameduntilupdatedat: item.streameduntilupdatedat})}>
             <View style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center' }}>
               <View style={{width: 48, height: 48, backgroundColor: '#E7E7E7', borderRadius: 32, justifyContent: 'center', alignItems: 'center'}}>
                 <Text style={{color: '#989CB0', fontSize: 24, fontFamily: 'Rubik', fontWeight: '600'}}>{item.name.charAt(0)}</Text>
