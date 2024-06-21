@@ -15,13 +15,17 @@ import { ethers } from 'ethers'
 import {celo} from 'viem/chains'
 import { Framework } from '@superfluid-finance/sdk-core'
 
-function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype}) {
+function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype, numUI}) {
   const [isFocused, setIsFocused] = useState(false);
 
   const handleFocus = () => setIsFocused(true);
   const handleBlur = () => setIsFocused(false);
 
   const isDarkMode = useColorScheme() === 'dark';
+
+  //--------
+  const fli = { paddingTop: 18, marginTop: margintop, borderBottomColor: isFocused ? "#15D828" : (isDarkMode ? Colors.light : Colors.dark), borderBottomWidth: 1, flexDirection: 'row', width: numUI == 1 ? '60%' : '100%' }
+  //--------
 
   const labelStyle = {
     position: 'absolute',
@@ -34,23 +38,26 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
     height: 26,
     fontSize: 20,
     color: isDarkMode ? Colors.white : Colors.black,
-    borderBottomWidth: 1,
-    borderBottomColor: isFocused ? "#15D828" : (isDarkMode ? Colors.light : Colors.dark)
+    width: '100%'
   }
   
   return (
-    <View style={{ paddingTop: 18, marginTop: margintop }}>
-      <Text style={labelStyle}>
-        {label}
-      </Text>
-      <TextInput
-        onChangeText={onchangetext}
-        style={textinputstyle}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        value={value}
-        keyboardType={keyboardtype}
-      />
+    <View style={{flexDirection: 'row'}}>
+      <View style={fli}>
+        <Text style={labelStyle}>
+          {label}
+        </Text>
+        <TextInput
+          onChangeText={onchangetext}
+          style={textinputstyle}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          value={value}
+          keyboardType={keyboardtype}
+        />
+      </View>
+      {numUI == 1 ? <View style={{width: '10%'}}><Text style={{position: 'absolute', bottom: 0, fontSize: 20, alignSelf: 'center'}}>/</Text></View> : <></>}
+      {numUI == 1 ? <View style={{width: '30%'}}><Text style={{position: 'absolute', bottom: 0, fontSize: 20}}>hour</Text></View> : <></>}
     </View>
   );
 }
@@ -67,6 +74,11 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
     [provider]
   )
 
+  async function hourrate(rate){
+    var rateweips = (rate * 1000000000000000000) / 3600
+    return Math.ceil(rateweips).toString()
+  }
+
   async function createflow(receiver, rate) {
     try {
       if (provider != undefined) {
@@ -74,13 +86,15 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
           chainId: celo.id,
           provider: web3Provider
         });
-        
+        const ratestr = await hourrate(rate)
+
         const signer = web3Provider.getSigner();
         const cusdx = await sf.loadSuperToken("cUSDx");
+        
         const createflow = cusdx.createFlow({
           sender: address,
           receiver: receiver,
-          flowRate: rate
+          flowRate: ratestr
         });
         await createflow.exec(signer)
         .then(() => {
@@ -135,6 +149,7 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
         onchangetext={receiverChange}
         margintop={18}
         keyboardtype="default"
+        numUI={0}
       />
       <FloatingLabelInput
         label="Rate"
@@ -142,6 +157,7 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
         onchangetext={rateChange}
         margintop={50}
         keyboardtype="numeric"
+        numUI={1}
       />
       <TouchableOpacity
         style={{ marginTop: 75, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
