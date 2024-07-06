@@ -10,6 +10,9 @@ build/
 local.properties
 *.iml
 *.hprof
+.cxx/
+*.apk
+*.aab
 
 # Bundle artifacts
 *.jsbundle
