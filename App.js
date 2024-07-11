@@ -5,6 +5,7 @@ import ConnectWallet from './ConnectWallet';
 import Streams from './Streams';
 import SingleStream from './Streams/SingleStream';
 import CreateStream from './CreateStream'
+import Unwrap from './Streams/Incoming/Unwrap';
 import '@walletconnect/react-native-compat'
 import { WagmiConfig } from 'wagmi'
 import { celo } from 'viem/chains'
@@ -117,6 +118,20 @@ function App() {
                     onPress={() => open()}
                     size={24}/>}}>
               {() => {return <CreateStream connectionprop={connectionprop} setdisabled={setDisabled} disabled={disabled} setrefreshoutgoing={setRefreshoutgoing} setcreatingstream={setCreatingstream} creatingstream={creatingstream}/>}}
+            </Stack.Screen>
+            <Stack.Screen
+              name="Unwrap"
+              options={{
+                headerStyle: {backgroundColor: isDarkMode ? Colors.darker : Colors.lighter},
+                headerBackImage: () => <Ionicons name="arrow-back" style={{color: isDarkMode ? Colors.white : Colors.black}} size={24} />,
+                headerTitle: "",
+                headerRight: () =>
+                  <MaterialCommunityIcons
+                    name="account"
+                    style={{paddingVertical: 10, paddingHorizontal: 15, color: isDarkMode ? Colors.white : Colors.black}}
+                    onPress={() => open()}
+                    size={24}/>}}>
+              {() => {return <Unwrap />}}
             </Stack.Screen>
             </>}
           </Stack.Navigator>

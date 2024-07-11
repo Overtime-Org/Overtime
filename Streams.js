@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import Incoming from './Streams/Incoming';
+import Incoming from './Streams/Incoming/Incoming';
 import Outgoing from './Streams/Outgoing';
 import { useColorScheme } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';

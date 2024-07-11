@@ -119,6 +119,7 @@ export default function Incoming() {
   }
 
   return (
+    <>
     <FlatList
       data={incoming}
       renderItem={({item}) => {
@@ -155,5 +156,21 @@ export default function Incoming() {
       ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: '#ececec'}}></View>}
       ListFooterComponent={() => <View style={{ height: 75}}/>}
       style={backgroundStyle}/>
+      <TouchableOpacity 
+        style={{
+          bottom: 44,
+          right: 32,
+          padding: 10,
+          borderRadius: 15,
+          position: 'absolute',
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: '#15D828',
+          elevation: 10
+        }}
+        onPress={() => navigation.navigate('Unwrap')}>
+        <Text style={{color: 'white', fontSize: 17}}>Retrieve</Text>
+      </TouchableOpacity>
+    </>
   );
 };

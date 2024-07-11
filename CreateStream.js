@@ -56,8 +56,8 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
           keyboardType={keyboardtype}
         />
       </View>
-      {numUI == 1 ? <View style={{width: '10%'}}><Text style={{position: 'absolute', bottom: 0, fontSize: 20, alignSelf: 'center'}}>/</Text></View> : <></>}
-      {numUI == 1 ? <View style={{width: '30%'}}><Text style={{position: 'absolute', bottom: 0, fontSize: 20}}>hour</Text></View> : <></>}
+      {numUI == 1 ? <View style={{width: '10%'}}><Text style={{position: 'absolute', bottom: 0, fontSize: 20, alignSelf: 'center', color: isDarkMode ? Colors.light : Colors.black}}>/</Text></View> : <></>}
+      {numUI == 1 ? <View style={{width: '30%'}}><Text style={{position: 'absolute', bottom: 0, fontSize: 20, color: isDarkMode ? Colors.light : Colors.black}}>hour</Text></View> : <></>}
     </View>
   );
 }
