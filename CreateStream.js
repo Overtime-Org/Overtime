@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   View,
   TextInput,
   Text,
   useColorScheme,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  Modal
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { AntDesign } from '@expo/vector-icons';
 import { useAccount } from 'wagmi'
 import "react-native-get-random-values"
 import "@ethersproject/shims"
@@ -23,9 +25,7 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
 
   const isDarkMode = useColorScheme() === 'dark';
 
-  //--------
   const fli = { paddingTop: 18, marginTop: margintop, borderBottomColor: isFocused ? "#15D828" : (isDarkMode ? Colors.light : Colors.dark), borderBottomWidth: 1, flexDirection: 'row', width: numUI == 1 ? '60%' : '100%' }
-  //--------
 
   const labelStyle = {
     position: 'absolute',
@@ -62,9 +62,93 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
   );
 }
 
+const Wrap = ({modalVisible, setModalVisible}) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const [wrapamount, setWrapamount] = useState('');
+
+  const handleFocus = () => setIsFocused(true);
+  const handleBlur = () => setIsFocused(false);
+
+  const wrapamountChange = (newText) => setWrapamount(newText);
+
+  const isDarkMode = useColorScheme() === 'dark';
+  const modalfli = { paddingTop: 18, marginTop: 10, borderBottomColor: isFocused ? "#15D828" : (isDarkMode ? Colors.light : Colors.dark), borderBottomWidth: 1, width: '100%' }
+  const labelStyle = {
+    position: 'absolute',
+    left: 0,
+    top: isFocused || wrapamount != '' ? 0 : 18,
+    fontSize: isFocused || wrapamount != '' ? 14 : 20,
+    color: isFocused ? "#15D828" : (isDarkMode ? Colors.light : "#989CB0")
+  }
+  const textinputstyle = { 
+    height: 26,
+    fontSize: 20,
+    color: isDarkMode ? Colors.white : Colors.black,
+    width: '100%'
+  }
+
+  return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={modalVisible}
+      onRequestClose={() => {
+        setModalVisible(false);
+      }}>
+      <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+        <View
+          style={{
+            padding: 10,
+            backgroundColor: isDarkMode ? Colors.dark : Colors.lighter,
+            width: '80%',
+            height: '40%',
+            borderRadius: 20,
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 4,
+            elevation: 5
+          }}>
+          <TouchableOpacity style={{alignSelf: 'flex-end'}} onPress={() => setModalVisible(false)}>
+            <AntDesign name="close" size={25} color={isDarkMode ? Colors.light : Colors.black}/>
+          </TouchableOpacity>
+
+          <View style={modalfli}>
+            <Text style={labelStyle}>
+              Amount
+            </Text>
+            <TextInput
+              onChangeText={wrapamountChange}
+              style={textinputstyle}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              value={wrapamount}
+              keyboardType={'numeric'}
+            />
+          </View>
+
+          <TouchableOpacity
+            style={{ marginTop: '10%', alignSelf: 'center', width: 95, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+            onPress={() => {}}>
+            <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>ADD</Text>
+          </TouchableOpacity>
+
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 export default function CreateStream({connectionprop, setdisabled, disabled, setrefreshoutgoing, setcreatingstream, creatingstream}) {
   const [receiver, setReceiver] = useState('');
   const [rate, setRate] = useState('');
+  //-------
+  const [balance, setBalance] = useState('--');
+  const [modalVisible, setModalVisible] = useState(false);
+  //-------
 
   const { address, connector } = useAccount()
   const provider = address == undefined ? undefined : connector._provider;
@@ -105,6 +189,55 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
     catch (error) {}
   }
 
+  //-------
+  function useInterval(callback, delay) {
+    const savedCallback = useRef();
+   
+    useEffect(() => {
+      savedCallback.current = callback;
+    }, [callback]);
+   
+    useEffect(() => {
+      function tick() {
+        savedCallback.current();
+      }
+      if (delay !== null) {
+        let id = setInterval(tick, delay);
+        return () => clearInterval(id);
+      }
+    }, [delay]);
+  }
+  //-------
+
+  //-------
+  async function checkbalance() {
+    try {
+      if (provider != undefined) {
+        const sf = await Framework.create({
+          chainId: celo.id,
+          provider: web3Provider
+        });
+
+        const signer = web3Provider.getSigner();
+        const cusdx = await sf.loadSuperToken("cUSDx");
+        
+        var balancewei = await cusdx.balanceOf({
+          account: address,
+          providerOrSigner: signer
+        })
+        
+        var balancecusdx = (Number(balancewei) / 1000000000) / 1000000000
+        setBalance(balancecusdx+" cUSDx")
+      }
+    }
+    catch (error) {}
+  }
+  //-------
+
+  useEffect(() => {
+    checkbalance()
+  }, [])
+
   useEffect(() => {
     if (address == undefined) {
       connectionprop(true)
@@ -136,6 +269,12 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
     }
   }, [rate])
 
+  //-------
+  useInterval(() => {
+    checkbalance()
+  }, 5000)
+  //-------
+
   const receiverChange = (newText) => setReceiver(newText);
   const rateChange = (newText) => setRate(newText);
 
@@ -159,11 +298,25 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
         keyboardtype="numeric"
         numUI={1}
       />
+      <Wrap modalVisible={modalVisible} setModalVisible={setModalVisible}/>
+      <View style={{flexDirection: 'row', marginTop: 35, width: '100%'}}>
+        <View style={{width: '60%', alignItems: 'center', justifyContent: 'center'}}>
+          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>{balance}</Text>
+        </View>
+        <View style={{width: '40%', alignItems: 'center', justifyContent: 'center'}}>
+          <TouchableOpacity
+            style={{borderColor: '#15D828', flexDirection: 'row', borderRadius: 20, borderWidth: 2, padding: 5}}
+            onPress={() => setModalVisible(true)}>
+            <AntDesign name="plus" size={20} color="#15D828" style={{fontWeight: '700'}} />
+            <Text style={{fontWeight: '700', color: '#15D828', marginLeft: 3, marginRight: 11}}>Add</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
       <TouchableOpacity
-        style={{ marginTop: 75, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+        style={{ marginTop: 40, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
         disabled={disabled}
         onPress={() => setdisabled(true)}>
-        <Text style={{ color: 'white', fontSize: 17, fontFamily: 'Inter', fontWeight: '700' }}>STREAM</Text>
+        <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>STREAM</Text>
       </TouchableOpacity>
     </ScrollView>
   );
