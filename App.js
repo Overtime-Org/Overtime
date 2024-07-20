@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import ConnectWallet from './ConnectWallet';
 import Streams from './Streams';
 import SingleStream from './Streams/SingleStream';
-import CreateStream from './CreateStream'
+import CreateStream from './CreateStream/CreateStream'
 import Unwrap from './Streams/Incoming/Unwrap';
 import '@walletconnect/react-native-compat'
 import { WagmiConfig } from 'wagmi'

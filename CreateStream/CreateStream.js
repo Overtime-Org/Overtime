@@ -5,8 +5,7 @@ import {
   Text,
   useColorScheme,
   TouchableOpacity,
-  ScrollView,
-  Modal
+  ScrollView
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { AntDesign } from '@expo/vector-icons';
@@ -16,6 +15,7 @@ import "@ethersproject/shims"
 import { ethers } from 'ethers'
 import {celo} from 'viem/chains'
 import { Framework } from '@superfluid-finance/sdk-core'
+import Wrap from './Wrap';
 
 function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype, numUI}) {
   const [isFocused, setIsFocused] = useState(false);
@@ -61,86 +61,6 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
     </View>
   );
 }
-
-const Wrap = ({modalVisible, setModalVisible}) => {
-  const [isFocused, setIsFocused] = useState(false);
-  const [wrapamount, setWrapamount] = useState('');
-
-  const handleFocus = () => setIsFocused(true);
-  const handleBlur = () => setIsFocused(false);
-
-  const wrapamountChange = (newText) => setWrapamount(newText);
-
-  const isDarkMode = useColorScheme() === 'dark';
-  const modalfli = { paddingTop: 18, marginTop: 10, borderBottomColor: isFocused ? "#15D828" : (isDarkMode ? Colors.light : Colors.dark), borderBottomWidth: 1, width: '100%' }
-  const labelStyle = {
-    position: 'absolute',
-    left: 0,
-    top: isFocused || wrapamount != '' ? 0 : 18,
-    fontSize: isFocused || wrapamount != '' ? 14 : 20,
-    color: isFocused ? "#15D828" : (isDarkMode ? Colors.light : "#989CB0")
-  }
-  const textinputstyle = { 
-    height: 26,
-    fontSize: 20,
-    color: isDarkMode ? Colors.white : Colors.black,
-    width: '100%'
-  }
-
-  return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={modalVisible}
-      onRequestClose={() => {
-        setModalVisible(false);
-      }}>
-      <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-        <View
-          style={{
-            padding: 10,
-            backgroundColor: isDarkMode ? Colors.dark : Colors.lighter,
-            width: '80%',
-            height: '40%',
-            borderRadius: 20,
-            shadowColor: '#000',
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 4,
-            elevation: 5
-          }}>
-          <TouchableOpacity style={{alignSelf: 'flex-end'}} onPress={() => setModalVisible(false)}>
-            <AntDesign name="close" size={25} color={isDarkMode ? Colors.light : Colors.black}/>
-          </TouchableOpacity>
-
-          <View style={modalfli}>
-            <Text style={labelStyle}>
-              Amount
-            </Text>
-            <TextInput
-              onChangeText={wrapamountChange}
-              style={textinputstyle}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              value={wrapamount}
-              keyboardType={'numeric'}
-            />
-          </View>
-
-          <TouchableOpacity
-            style={{ marginTop: '10%', alignSelf: 'center', width: 95, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
-            onPress={() => {}}>
-            <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>ADD</Text>
-          </TouchableOpacity>
-
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function CreateStream({connectionprop, setdisabled, disabled, setrefreshoutgoing, setcreatingstream, creatingstream}) {
   const [receiver, setReceiver] = useState('');

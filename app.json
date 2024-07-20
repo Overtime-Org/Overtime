@@ -24,7 +24,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "ke.co.mungeian",
-      "versionCode": 9
+      "versionCode": 11
     },
     "web": {
       "favicon": "./assets/favicon.png"
