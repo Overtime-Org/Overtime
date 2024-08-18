@@ -14,7 +14,7 @@
 		96905EF65AED1B983A6B3ABC /* libPods-Overtime.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58EEBF8E8E6FB1BC6CAF49B5 /* libPods-Overtime.a */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		90ACAD6A0D864532A7FA45EA /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11C4B8CC3A6A40F8B0202245 /* noop-file.swift */; };
+		A5A335929EB4472292E3C310 /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E05E0DE96F6425BB7F5D1ED /* noop-file.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,8 +31,8 @@
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Overtime/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		11C4B8CC3A6A40F8B0202245 /* noop-file.swift */ = {isa = PBXFileReference; name = "noop-file.swift"; path = "Overtime/noop-file.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
-		2AE663120C9E4B5F8F8FD8BA /* Overtime-Bridging-Header.h */ = {isa = PBXFileReference; name = "Overtime-Bridging-Header.h"; path = "Overtime/Overtime-Bridging-Header.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
+		9E05E0DE96F6425BB7F5D1ED /* noop-file.swift */ = {isa = PBXFileReference; name = "noop-file.swift"; path = "Overtime/noop-file.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
+		008AEA901B3949D08D91DA81 /* Overtime-Bridging-Header.h */ = {isa = PBXFileReference; name = "Overtime-Bridging-Header.h"; path = "Overtime/Overtime-Bridging-Header.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,8 +57,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				11C4B8CC3A6A40F8B0202245 /* noop-file.swift */,
-				2AE663120C9E4B5F8F8FD8BA /* Overtime-Bridging-Header.h */,
+				9E05E0DE96F6425BB7F5D1ED /* noop-file.swift */,
+				008AEA901B3949D08D91DA81 /* Overtime-Bridging-Header.h */,
 			);
 			name = Overtime;
 			sourceTree = "<group>";
@@ -198,7 +198,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				4744F576D1A04AEBB1C25EFC /* Overtime-Bridging-Header.h in Resources */,
+				BC8B55267889441DAE62E274 /* Overtime-Bridging-Header.h in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,7 +274,7 @@
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,
-				90ACAD6A0D864532A7FA45EA /* noop-file.swift in Sources */,
+				A5A335929EB4472292E3C310 /* noop-file.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

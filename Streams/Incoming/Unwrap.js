@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   View,
   TextInput,
@@ -61,6 +61,7 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
 export default function Unwrap() {
   const [amount, setAmount] = useState('');
   const [disabled, setDisabled] = useState(false);
+  const [balance, setBalance] = useState('--');
   useEffect(() => {
     if (disabled == true) {
       const amountstr = (amount * 1000000000000000000).toString()
@@ -74,6 +75,10 @@ export default function Unwrap() {
     }
   }, [amount])
 
+  useEffect(() => {
+    checkbalance()
+  }, [])
+
   const { address, connector } = useAccount()
   const provider = address == undefined ? undefined : connector._provider;
   const web3Provider = useMemo(
@@ -81,6 +86,51 @@ export default function Unwrap() {
         provider ? new ethers.providers.Web3Provider(provider, celo.id) : undefined,
     [provider]
   )
+
+  async function checkbalance() {
+    try {
+      if (provider != undefined) {
+        const sf = await Framework.create({
+          chainId: celo.id,
+          provider: web3Provider
+        });
+
+        const signer = web3Provider.getSigner();
+        const cusdx = await sf.loadSuperToken("cUSDx");
+        
+        var balancewei = await cusdx.balanceOf({
+          account: address,
+          providerOrSigner: signer
+        })
+        
+        var balancecusdx = (Number(balancewei) / 1000000000) / 1000000000
+        setBalance(balancecusdx+" cUSDx")
+      }
+    }
+    catch (error) {}
+  }
+
+  function useInterval(callback, delay) {
+    const savedCallback = useRef();
+   
+    useEffect(() => {
+      savedCallback.current = callback;
+    }, [callback]);
+   
+    useEffect(() => {
+      function tick() {
+        savedCallback.current();
+      }
+      if (delay !== null) {
+        let id = setInterval(tick, delay);
+        return () => clearInterval(id);
+      }
+    }, [delay]);
+  }
+
+  useInterval(() => {
+    checkbalance()
+  }, 5000)
 
   async function unwrap(amount) {
     try {
@@ -110,8 +160,9 @@ export default function Unwrap() {
         margintop={18}
         keyboardtype="numeric"
       />
+      <Text style={{color: isDarkMode ? Colors.white : Colors.black, marginTop: 20}}>{balance}</Text>
       <TouchableOpacity
-        style={{ marginTop: 75, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+        style={{ marginTop: 40, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
         disabled={disabled}
         onPress={() => {
           if (amount.length > 0 && isNaN(Number(amount)) == false) {

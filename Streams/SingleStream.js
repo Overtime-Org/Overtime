@@ -15,6 +15,7 @@ import BalanceTemp from './BalanceTemp';
 
 const SingleStream = ({route, connectionprop, setdeleted_refresh}) => {
   const [deleting, isDeleting] = useState(false);
+  const [stylestate, setStylestate] = useState('outline');
   const { address, connector } = useAccount()
   const provider = address == undefined ? undefined : connector._provider;
   const web3Provider = useMemo(
@@ -69,16 +70,20 @@ const SingleStream = ({route, connectionprop, setdeleted_refresh}) => {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
-
   const width1st = () => {
     return (30 / 100) * Dimensions.get('window').width;
   };
   const width2nd = () => {
     return (70 / 100) * Dimensions.get('window').width;
   };
-
   const width0 = width1st();
   const width1 = width2nd();
+  
+  const buttonstyle = stylestate == 'outline' ? { marginTop: 35, width: 190, height: 40, borderColor: '#FA0514', borderWidth: 2, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }
+    : { marginTop: 35, width: 190, height: 40, backgroundColor: '#FA0514', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }
+  const cancelstream = stylestate == 'outline' ? { color: '#FA0514', fontSize: 17, fontFamily: 'Inter', fontWeight: '700' }
+    : { color: isDarkMode ? Colors.darker : 'white', fontSize: 17, fontFamily: 'Inter', fontWeight: '700' }
+
 
   var ratecusdx = (Number(route.params.rate) / 1000000000000000000) * 3600
 
@@ -126,10 +131,12 @@ const SingleStream = ({route, connectionprop, setdeleted_refresh}) => {
         <></>
         : 
         <TouchableOpacity
-          style={{ marginTop: 35, width: 190, height: 40, backgroundColor: '#FA0514', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+          style={buttonstyle}
           disabled={deleting}
+          onPressIn={() => setStylestate('fill')}
+          onPressOut={() => setStylestate('outline')}
           onPress={deleting ? () => {} : () => {isDeleting(true)}}>
-          <Text style={{ color: 'white', fontSize: 17, fontFamily: 'Inter', fontWeight: '700' }}>CANCEL STREAM</Text>
+          <Text style={cancelstream}>CANCEL STREAM</Text>
         </TouchableOpacity>}
       </View>
     </View>
