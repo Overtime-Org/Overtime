@@ -9,13 +9,14 @@ import {
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { AntDesign } from '@expo/vector-icons';
-import { useAccount } from 'wagmi'
+import { useAccount, useContractRead } from 'wagmi'
 import "react-native-get-random-values"
 import "@ethersproject/shims"
 import { ethers } from 'ethers'
 import {celo} from 'viem/chains'
 import { Framework } from '@superfluid-finance/sdk-core'
 import Wrap from './Wrap';
+import SuperToken from '../supertoken.abi.json';
 
 function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype, numUI}) {
   const [isFocused, setIsFocused] = useState(false);
@@ -65,10 +66,7 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
 export default function CreateStream({connectionprop, setdisabled, disabled, setrefreshoutgoing, setcreatingstream, creatingstream}) {
   const [receiver, setReceiver] = useState('');
   const [rate, setRate] = useState('');
-  //-------
-  const [balance, setBalance] = useState('--');
   const [modalVisible, setModalVisible] = useState(false);
-  //-------
 
   const { address, connector } = useAccount()
   const provider = address == undefined ? undefined : connector._provider;
@@ -109,7 +107,6 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
     catch (error) {}
   }
 
-  //-------
   function useInterval(callback, delay) {
     const savedCallback = useRef();
    
@@ -127,36 +124,14 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
       }
     }, [delay]);
   }
-  //-------
 
-  //-------
-  async function checkbalance() {
-    try {
-      if (provider != undefined) {
-        const sf = await Framework.create({
-          chainId: celo.id,
-          provider: web3Provider
-        });
-
-        const signer = web3Provider.getSigner();
-        const cusdx = await sf.loadSuperToken("cUSDx");
-        
-        var balancewei = await cusdx.balanceOf({
-          account: address,
-          providerOrSigner: signer
-        })
-        
-        var balancecusdx = (Number(balancewei) / 1000000000) / 1000000000
-        setBalance(balancecusdx+" cUSDx")
-      }
-    }
-    catch (error) {}
-  }
-  //-------
-
-  useEffect(() => {
-    checkbalance()
-  }, [])
+  var queryresult = useContractRead({
+    address: '0x3AcB9A08697b6Db4cD977e8Ab42b6f24722e6D6e',
+    abi: SuperToken,
+    functionName: 'balanceOf',
+    args: [address],
+    chainId: celo.id
+  })
 
   useEffect(() => {
     if (address == undefined) {
@@ -189,11 +164,9 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
     }
   }, [rate])
 
-  //-------
   useInterval(() => {
-    checkbalance()
-  }, 5000)
-  //-------
+    queryresult.refetch()
+  }, 3000)
 
   const receiverChange = (newText) => setReceiver(newText);
   const rateChange = (newText) => setRate(newText);
@@ -221,7 +194,7 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
       <Wrap modalVisible={modalVisible} setModalVisible={setModalVisible}/>
       <View style={{flexDirection: 'row', marginTop: 35, width: '100%'}}>
         <View style={{width: '60%', alignItems: 'center', justifyContent: 'center'}}>
-          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>{balance}</Text>
+          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>{queryresult.isFetched ? Number(queryresult.data) / 1000000000 / 1000000000 : "--"} cUSDx</Text>
         </View>
         <View style={{width: '40%', alignItems: 'center', justifyContent: 'center'}}>
           <TouchableOpacity

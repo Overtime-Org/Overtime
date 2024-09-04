@@ -31,7 +31,6 @@ function ConnectWallet({connectionprop}) {
           <ActivityIndicator size="small" color="white"/>
         : <Text style={{ color: 'white', fontSize: 17, fontFamily: 'Inter', fontWeight: '700' }}>CONNECT WALLET</Text>}
       </TouchableOpacity>
-      <Text style={{marginTop: 20, color: isDarkMode ? Colors.light : Colors.dark, paddingHorizontal: 20}}>Overtime transacts in streamable cUSD (cUSDx). The streamable cUSD balance is separate from the regular cUSD balance</Text>
     </View>
   )
 };

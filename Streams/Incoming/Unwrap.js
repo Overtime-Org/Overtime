@@ -8,12 +8,13 @@ import {
   ScrollView
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { useAccount } from 'wagmi'
+import { useAccount, useContractRead } from 'wagmi'
 import "react-native-get-random-values"
 import "@ethersproject/shims"
 import { ethers } from 'ethers'
 import {celo} from 'viem/chains'
 import { Framework } from '@superfluid-finance/sdk-core'
+import SuperToken from '../../supertoken.abi.json';
 
 function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype}) {
   const [isFocused, setIsFocused] = useState(false);
@@ -61,7 +62,6 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
 export default function Unwrap() {
   const [amount, setAmount] = useState('');
   const [disabled, setDisabled] = useState(false);
-  const [balance, setBalance] = useState('--');
   useEffect(() => {
     if (disabled == true) {
       const amountstr = (amount * 1000000000000000000).toString()
@@ -75,10 +75,6 @@ export default function Unwrap() {
     }
   }, [amount])
 
-  useEffect(() => {
-    checkbalance()
-  }, [])
-
   const { address, connector } = useAccount()
   const provider = address == undefined ? undefined : connector._provider;
   const web3Provider = useMemo(
@@ -87,28 +83,13 @@ export default function Unwrap() {
     [provider]
   )
 
-  async function checkbalance() {
-    try {
-      if (provider != undefined) {
-        const sf = await Framework.create({
-          chainId: celo.id,
-          provider: web3Provider
-        });
-
-        const signer = web3Provider.getSigner();
-        const cusdx = await sf.loadSuperToken("cUSDx");
-        
-        var balancewei = await cusdx.balanceOf({
-          account: address,
-          providerOrSigner: signer
-        })
-        
-        var balancecusdx = (Number(balancewei) / 1000000000) / 1000000000
-        setBalance(balancecusdx+" cUSDx")
-      }
-    }
-    catch (error) {}
-  }
+  var queryresult = useContractRead({
+    address: '0x3AcB9A08697b6Db4cD977e8Ab42b6f24722e6D6e',
+    abi: SuperToken,
+    functionName: 'balanceOf',
+    args: [address],
+    chainId: celo.id
+  })
 
   function useInterval(callback, delay) {
     const savedCallback = useRef();
@@ -129,8 +110,8 @@ export default function Unwrap() {
   }
 
   useInterval(() => {
-    checkbalance()
-  }, 5000)
+    queryresult.refetch()
+  }, 3000)
 
   async function unwrap(amount) {
     try {
@@ -160,7 +141,7 @@ export default function Unwrap() {
         margintop={18}
         keyboardtype="numeric"
       />
-      <Text style={{color: isDarkMode ? Colors.white : Colors.black, marginTop: 20}}>{balance}</Text>
+      <Text style={{color: isDarkMode ? Colors.white : Colors.black, marginTop: 20}}>{queryresult.isFetched ? Number(queryresult.data) / 1000000000 / 1000000000 : "--"} cUSDx</Text>
       <TouchableOpacity
         style={{ marginTop: 40, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
         disabled={disabled}
