@@ -1,22 +1,20 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   TextInput,
   Text,
   useColorScheme,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  ActivityIndicator
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { AntDesign } from '@expo/vector-icons';
-import { useAccount, useContractRead } from 'wagmi'
-import "react-native-get-random-values"
-import "@ethersproject/shims"
-import { ethers } from 'ethers'
+import { useAccount, useContractRead, useContractWrite } from 'wagmi'
 import {celo} from 'viem/chains'
-import { Framework } from '@superfluid-finance/sdk-core'
-import Wrap from './Wrap';
-import SuperToken from '../supertoken.abi.json';
+import Wrap from './Wrap'
+import SuperToken from '../abis/supertoken.abi.json';
+import CFAv1Forwarder from '../abis/cfav1forwarder.abi.json';
 
 function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype, numUI}) {
   const [isFocused, setIsFocused] = useState(false);
@@ -70,42 +68,6 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
 
   const { address, connector } = useAccount()
   const provider = address == undefined ? undefined : connector._provider;
-  const web3Provider = useMemo(
-    () =>
-        provider ? new ethers.providers.Web3Provider(provider, celo.id) : undefined,
-    [provider]
-  )
-
-  async function hourrate(rate){
-    var rateweips = (rate * 1000000000000000000) / 3600
-    return Math.ceil(rateweips).toString()
-  }
-
-  async function createflow(receiver, rate) {
-    try {
-      if (provider != undefined) {
-        const sf = await Framework.create({
-          chainId: celo.id,
-          provider: web3Provider
-        });
-        const ratestr = await hourrate(rate)
-
-        const signer = web3Provider.getSigner();
-        const cusdx = await sf.loadSuperToken("cUSDx");
-        
-        const createflow = cusdx.createFlow({
-          sender: address,
-          receiver: receiver,
-          flowRate: ratestr
-        });
-        await createflow.exec(signer)
-        .then(() => {
-          setReceiver('');
-        });
-      }
-    }
-    catch (error) {}
-  }
 
   function useInterval(callback, delay) {
     const savedCallback = useRef();
@@ -126,12 +88,40 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
   }
 
   var queryresult = useContractRead({
-    address: '0x3AcB9A08697b6Db4cD977e8Ab42b6f24722e6D6e',
+    address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
     abi: SuperToken,
     functionName: 'balanceOf',
-    args: [address],
+    args: [address == undefined ? "" : address.toLowerCase()],
     chainId: celo.id
-  })
+  });
+
+  const { isSuccess, write } = useContractWrite({
+    address: '0xcfA132E353cB4E398080B9700609bb008eceB125',
+    abi: CFAv1Forwarder,
+    functionName: 'createFlow',
+    chainId: celo.id
+  });
+
+  async function hourrate(rate){
+    var rateweips = (rate * 1000000000000000000) / 3600
+    return Math.ceil(rateweips).toString()
+  }
+
+  async function createflow(receiver, rate) {
+    try {
+      if (provider != undefined) {
+        const ratestr = await hourrate(rate);
+        write({args: [
+          '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
+          address == undefined ? "" : address.toLowerCase(),
+          receiver,
+          ratestr,
+          address == undefined ? "" : address.toLowerCase()
+        ]});
+      }
+    }
+    catch (error) {}
+  }
 
   useEffect(() => {
     if (address == undefined) {
@@ -159,13 +149,16 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
 
   useEffect(() => {
     if (receiver == '' && rate == '' && creatingstream == true) {
-      //setrefreshoutgoing(true);
       setcreatingstream(false)
     }
   }, [rate])
 
+  useEffect(() => {
+    setReceiver('');
+  }, [isSuccess]);
+
   useInterval(() => {
-    queryresult.refetch()
+    queryresult.refetch();
   }, 3000)
 
   const receiverChange = (newText) => setReceiver(newText);
@@ -206,11 +199,17 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
         </View>
       </View>
       <TouchableOpacity
-        style={{ marginTop: 40, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+        style={{ marginTop: 40, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center', opacity: disabled == true ? 0.6 : 1 }}
         disabled={disabled}
         onPress={() => setdisabled(true)}>
-        <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>STREAM</Text>
+        {disabled == true ? <ActivityIndicator size="small" color="white"/> : <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>STREAM</Text>}
       </TouchableOpacity>
+      {/* {isSuccess == true ? 
+        <View style={{flexDirection: 'row', marginTop: 15}}>
+          <AntDesign name="check" size={20} color="#15D828" style={{fontWeight: '700'}} />
+          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}> Stream started</Text>
+        </View>
+      : <></>} */}
     </ScrollView>
   );
 }

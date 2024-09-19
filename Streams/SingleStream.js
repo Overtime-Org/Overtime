@@ -1,28 +1,21 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { Text, View, useColorScheme, Dimensions, TouchableOpacity, Linking } from "react-native";
 import { useNavigation } from '@react-navigation/native'
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Octicons } from '@expo/vector-icons';
-import { useAccount } from 'wagmi'
-import "react-native-get-random-values"
-import "@ethersproject/shims"
-import { ethers } from 'ethers'
+import { useAccount, useContractWrite } from 'wagmi'
 import {celo} from 'viem/chains'
-import { Framework } from '@superfluid-finance/sdk-core'
 import FlowingBalance from './FlowingBalance';
 import Elapsed from './Elapsed';
 import BalanceTemp from './BalanceTemp';
+import CFAv1Forwarder from '../abis/cfav1forwarder.abi.json';
 
-const SingleStream = ({route, connectionprop, setdeleted_refresh}) => {
+const SingleStream = ({route, connectionprop}) => {
   const [deleting, isDeleting] = useState(false);
   const [stylestate, setStylestate] = useState('outline');
-  const { address, connector } = useAccount()
+
+  const { address, connector } = useAccount();
   const provider = address == undefined ? undefined : connector._provider;
-  const web3Provider = useMemo(
-    () =>
-        provider ? new ethers.providers.Web3Provider(provider, celo.id) : undefined,
-    [provider]
-  );
   
   useEffect(() => {
     if (address == undefined) {
@@ -37,33 +30,35 @@ const SingleStream = ({route, connectionprop, setdeleted_refresh}) => {
       funcdeleteflow()
     }
   }, [deleting]);
+
+  const deleteflowwrite = useContractWrite({
+    address: '0xcfA132E353cB4E398080B9700609bb008eceB125',
+    abi: CFAv1Forwarder,
+    functionName: 'deleteFlow',
+    chainId: celo.id
+  });
+
   const navigation = useNavigation();
 
   async function funcdeleteflow(){
     try {
       if (provider != undefined){
-        const sf = await Framework.create({
-          chainId: celo.id,
-          provider: web3Provider
-        })
-        const signer = web3Provider.getSigner();
-        const cusdx = await sf.loadSuperToken("cUSDx");
-        
-        const deleteflow = cusdx.deleteFlow({
-          sender: address,
-          receiver: route.params.name
-        })
-        await deleteflow.exec(signer)
-        .then(() => {
-          isDeleting(false)
-          //setdeleted_refresh(true)
-          navigation.goBack()
-        })
+        deleteflowwrite.write({args: [
+          '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
+          address == undefined ? "" : address.toLowerCase(),
+          route.params.name,
+          address == undefined ? "" : address.toLowerCase()
+        ]});
       }
     }
     catch (error) {
       isDeleting(false)
     }
+  }
+
+  async function deleteflowsuccess() {
+    isDeleting(false);
+    navigation.goBack();
   }
   
   const isDarkMode = useColorScheme() === 'dark';
@@ -91,6 +86,10 @@ const SingleStream = ({route, connectionprop, setdeleted_refresh}) => {
   let starteddate = new Date(route.params.started * 1000)
   var startdisplay = starteddate.getUTCDate()+"-"+months[starteddate.getUTCMonth()]+"-"+starteddate.getUTCFullYear()+" "+starteddate.toISOString().split('T')[1].split('.')[0]+" UTC"
 
+  {deleteflowwrite.isSuccess == true ?
+    () => deleteflowsuccess()
+  : () => {}}
+
   return (
     <View style={{ ...backgroundStyle, flex: 1 }}>
       <View style={{ alignItems: 'center', justifyContent: 'space-evenly', flex: 0.6, paddingRight: 5 }}>
@@ -112,7 +111,6 @@ const SingleStream = ({route, connectionprop, setdeleted_refresh}) => {
         </View>
         <View style={{flexDirection: 'row'}}>
           <View style={{ width: width0, alignItems: 'flex-end' }}><Text style={{color: isDarkMode ? Colors.white : "#686C80", fontFamily: 'Rubik', fontSize: 15}}>Streamed:</Text></View>
-          {/* <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center' }}><Text style={{color: "#15D828", fontFamily: 'Rubik', marginLeft: 12, fontSize: 15, height: 20}}>{route.params.streamed} cUSDx</Text></View> */}
           
           {route.params.type === 'incoming' ?
           <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center' }}><FlowingBalance startingBalance={BigInt(route.params.streameduntilupdatedat)} startingBalanceDate={new Date(route.params.updatedattimestamp * 1000)} flowRate={BigInt(route.params.rate)}/></View>

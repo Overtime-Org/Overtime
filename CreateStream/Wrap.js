@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   TextInput,
@@ -10,92 +10,48 @@ import {
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { AntDesign } from '@expo/vector-icons';
-import { useAccount } from 'wagmi'
-import "react-native-get-random-values"
-import "@ethersproject/shims"
-import { ethers } from 'ethers'
+import { useContractWrite } from 'wagmi'
 import {celo} from 'viem/chains'
-import { Framework } from '@superfluid-finance/sdk-core'
+import StableTokenV2 from '../abis/stabletokenv2.abi.json'
+import SuperToken from '../abis/supertoken.abi.json';
 
 const Wrap = ({modalVisible, setModalVisible}) => {
   const [isFocused, setIsFocused] = useState(false);
   const [wrapamount, setWrapamount] = useState('');
   const [disableadd, setDisableadd] = useState(false);
-  const [step, setStep] = useState(0);
-  const [amountwei, setAmountwei] = useState('');
+
+  const wrap0write = useContractWrite({
+    address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
+    abi: StableTokenV2,
+    functionName: 'approve',
+    chainId: celo.id
+  });
+  const wrap1write = useContractWrite({
+    address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
+    abi: SuperToken,
+    functionName: 'upgrade',
+    chainId: celo.id
+  });
+
   useEffect(() => {
     if (disableadd == true) {
-      const wrapamountstr = (wrapamount * 1000000000000000000).toString()
-      wrap0(wrapamountstr)
+      const wrapamountstr = (wrapamount * 1000000000000000000).toString();
+      wrap0(wrapamountstr);
     }
   }, [disableadd])
-  useEffect(() => {
-    if (wrapamount == '' && disableadd == true) {
-      setDisableadd(false)
-    }
-  }, [wrapamount])
-  useEffect(() => {
-    if (amountwei.length > 0) {
-      setStep(step + 1)
-    }
-  }, [amountwei])
-
-  const { address, connector } = useAccount()
-  const provider = address == undefined ? undefined : connector._provider;
-  const web3Provider = useMemo(
-    () =>
-        provider ? new ethers.providers.Web3Provider(provider, celo.id) : undefined,
-    [provider]
-  )
 
   async function wrap0(amount) {
     try {
-      if (provider != undefined){
-        const sf = await Framework.create({
-          chainId: celo.id,
-          provider: web3Provider
-        });
-        const signer = web3Provider.getSigner();
-        const cusd = (await sf.loadSuperToken("cUSDx")).underlyingToken;
-        const funapprove = cusd.approve({
-          receiver: "0x3AcB9A08697b6Db4cD977e8Ab42b6f24722e6D6e",
-          amount: amount
-        });
-        await funapprove.exec(signer)
-        .then(() => {
-          setWrapamount('')
-          setAmountwei(amount)
-        })
-        
-      }
+      wrap0write.write({args: ['0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e', amount]})
     }
-    catch (error) {
-      setWrapamount('')
-    }
+    catch (error) {}
   }
 
   async function wrap1() {
     try {
-      if (provider != undefined){
-        if (amountwei.length > 0) {
-          const sf = await Framework.create({
-            chainId: celo.id,
-            provider: web3Provider
-          });
-          const signer = web3Provider.getSigner();
-          const cusdx = await sf.loadSuperToken("cUSDx");
-          const funupgrade = cusdx.upgrade({amount: amountwei});
-          await funupgrade.exec(signer)
-          .then(() => {
-            setStep(step + 1)
-          })
-        }
-      }
+      wrap1write.write({args: [(wrapamount * 1000000000000000000).toString()]})
     }
-    catch (error) {
-      setAmountwei('')
-      setStep(0)
-    }
+    catch (error) {}
   }
 
   const handleFocus = () => setIsFocused(true);
@@ -141,10 +97,6 @@ const Wrap = ({modalVisible, setModalVisible}) => {
       transparent={true}
       visible={modalVisible}
       onRequestClose={() => {
-        if (step == 2) {
-          setAmountwei('')
-          setStep(0)
-        }
         setModalVisible(false);
       }}>
       <View style={modal_swholescreenstyle}>
@@ -153,55 +105,51 @@ const Wrap = ({modalVisible, setModalVisible}) => {
             <TouchableOpacity
               style={{alignSelf: 'flex-end'}}
               onPress={() => {
-                if (step == 2) {
-                  setAmountwei('')
-                  setStep(0)
-                }
                 setModalVisible(false)
               }}>
               <AntDesign name="close" size={25} color={isDarkMode ? Colors.light : Colors.black}/>
             </TouchableOpacity>
+            {wrap1write.isSuccess == true ? 
+              (<Text style={{marginTop: 10, color: isDarkMode ? Colors.white : Colors.black}}>{wrapamount} cUSDx added successfully</Text>)
+            :
+              (wrap0write.isSuccess == true ?
+                <>
+                  <Text style={{marginTop: 10, color: isDarkMode ? Colors.white : Colors.black}}>Finish adding {wrapamount} cUSDx</Text>
+                  <TouchableOpacity
+                    style={{ marginTop: '10%', alignSelf: 'center', width: 95, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+                    onPress={() => wrap1()}>
+                    <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>FINISH</Text>
+                  </TouchableOpacity>
+                </>
+              :
+                <>
+                  <Text style={{marginTop: 10, color: isDarkMode ? Colors.white : Colors.black}}>Allow Overtime to spend an amount of cUSD on cUSDx</Text>
+                  <View style={fli}>
+                    <Text style={labelStyle}>
+                      Amount
+                    </Text>
+                    <TextInput
+                      onChangeText={wrapamountChange}
+                      style={textinputstyle}
+                      onFocus={handleFocus}
+                      onBlur={handleBlur}
+                      value={wrapamount}
+                      keyboardType={'numeric'}
+                    />
+                  </View>
 
-            {step == 0 ? <Text style={{marginTop: 10, color: isDarkMode ? Colors.white : Colors.black}}>Allow Overtime to spend an amount of cUSD on cUSDx</Text> : <></>}
-            {step == 0 ?
-              <View style={fli}>
-                <Text style={labelStyle}>
-                  Amount
-                </Text>
-                <TextInput
-                  onChangeText={wrapamountChange}
-                  style={textinputstyle}
-                  onFocus={handleFocus}
-                  onBlur={handleBlur}
-                  value={wrapamount}
-                  keyboardType={'numeric'}
-                />
-              </View>
-            : <></>}
-
-            {step == 0 ?
-              <TouchableOpacity
-                style={{ marginTop: '10%', alignSelf: 'center', width: 95, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
-                disabled={disableadd}
-                onPress={() => {
-                  if (wrapamount.length > 0 && isNaN(Number(wrapamount)) == false) {
-                    setDisableadd(true)
-                  }
-                }}>
-                <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>ALLOW</Text>
-              </TouchableOpacity>
-            : <></>}
-            
-            {step == 1 ? <Text style={{marginTop: 10, color: isDarkMode ? Colors.white : Colors.black}}>Finish adding {(Number(amountwei) / 1000000000) / 1000000000} cUSDx</Text> : <></>}
-            {step == 1 ?
-              <TouchableOpacity
-                style={{ marginTop: '10%', alignSelf: 'center', width: 95, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
-                onPress={() => wrap1()}>
-                <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>FINISH</Text>
-              </TouchableOpacity>
-            : <></>}
-
-            {step == 2 ? <Text style={{marginTop: 10, color: isDarkMode ? Colors.white : Colors.black}}>{(Number(amountwei) / 1000000000) / 1000000000} cUSDx added successfully</Text> : <></>}
+                  <TouchableOpacity
+                    style={{ marginTop: '10%', alignSelf: 'center', width: 95, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+                    disabled={disableadd}
+                    onPress={() => {
+                      if (wrapamount.length > 0 && isNaN(Number(wrapamount)) == false) {
+                        setDisableadd(true)
+                      }
+                    }}>
+                    <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>ALLOW</Text>
+                  </TouchableOpacity>
+                </>)
+              }
           </ScrollView>
         </View>
       </View>

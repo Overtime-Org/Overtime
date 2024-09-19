@@ -1,22 +1,19 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   TextInput,
   Text,
   useColorScheme,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  ActivityIndicator
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { useAccount, useContractRead } from 'wagmi'
-import "react-native-get-random-values"
-import "@ethersproject/shims"
-import { ethers } from 'ethers'
+import { useAccount, useContractRead, useContractWrite } from 'wagmi'
 import {celo} from 'viem/chains'
-import { Framework } from '@superfluid-finance/sdk-core'
-import SuperToken from '../../supertoken.abi.json';
+import SuperToken from '../../abis/supertoken.abi.json';
 
-function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype}) {
+function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype, readonly}) {
   const [isFocused, setIsFocused] = useState(false);
 
   const handleFocus = () => setIsFocused(true);
@@ -53,6 +50,7 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
           onBlur={handleBlur}
           value={value}
           keyboardType={keyboardtype}
+          readOnly={readonly}
         />
       </View>
     </View>
@@ -62,34 +60,57 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
 export default function Unwrap() {
   const [amount, setAmount] = useState('');
   const [disabled, setDisabled] = useState(false);
+  const [readonly, setReadonly] = useState(false);
+  
+  useEffect(() => {
+    if (readonly == true) {
+      if (amount.length > 0 && isNaN(Number(amount)) == false) {
+        const amountbigint = amount * 1000000000000000000;
+        unwrap(amountbigint)
+      }
+      else{
+        setDisabled(false);
+        setReadonly(false);
+      }
+    }
+  }, [readonly])
+
   useEffect(() => {
     if (disabled == true) {
-      const amountstr = (amount * 1000000000000000000).toString()
-      unwrap(amountstr)
+      setReadonly(true);
     }
   }, [disabled])
 
   useEffect(() => {
-    if (amount == '' && disabled == true) {
-      setDisabled(false)
+    if (amount.length == 0 && readonly == true && disabled == true) {
+      setReadonly(false);
+      setDisabled(false);
     }
-  }, [amount])
+  }, [amount]);
 
   const { address, connector } = useAccount()
   const provider = address == undefined ? undefined : connector._provider;
-  const web3Provider = useMemo(
-    () =>
-        provider ? new ethers.providers.Web3Provider(provider, celo.id) : undefined,
-    [provider]
-  )
-
+  
   var queryresult = useContractRead({
-    address: '0x3AcB9A08697b6Db4cD977e8Ab42b6f24722e6D6e',
+    address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
     abi: SuperToken,
     functionName: 'balanceOf',
-    args: [address],
+    args: [address == undefined ? "" : address.toLowerCase()],
     chainId: celo.id
-  })
+  });
+  
+  const { data, isSuccess, write } = useContractWrite({
+    address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
+    abi: SuperToken,
+    functionName: 'downgrade',
+    chainId: celo.id
+  });
+
+  useEffect(() => {
+    if (isSuccess == true) {
+      setAmount('');
+    }
+  }, [data])
 
   function useInterval(callback, delay) {
     const savedCallback = useRef();
@@ -116,14 +137,7 @@ export default function Unwrap() {
   async function unwrap(amount) {
     try {
       if (provider != undefined){
-        const sf = await Framework.create({
-          chainId: celo.id,
-          provider: web3Provider
-        });
-        const signer = web3Provider.getSigner();
-        const cusdx = await sf.loadSuperToken("cUSDx");
-        const fundowngrade = cusdx.downgrade({amount: amount})
-        await fundowngrade.exec(signer).then(() => setAmount(''))
+        write({args: [amount]});
       }
     }
     catch (error) {setAmount('')}
@@ -140,17 +154,16 @@ export default function Unwrap() {
         onchangetext={amountChange}
         margintop={18}
         keyboardtype="numeric"
+        readonly={readonly}
       />
       <Text style={{color: isDarkMode ? Colors.white : Colors.black, marginTop: 20}}>{queryresult.isFetched ? Number(queryresult.data) / 1000000000 / 1000000000 : "--"} cUSDx</Text>
       <TouchableOpacity
-        style={{ marginTop: 40, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+        style={{ marginTop: 40, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center', opacity: disabled == true ? 0.6 : 1 }}
         disabled={disabled}
         onPress={() => {
-          if (amount.length > 0 && isNaN(Number(amount)) == false) {
-            setDisabled(true)
-          }
+          setDisabled(true);
         }}>
-        <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>RETRIEVE</Text>
+        {disabled == true ? <ActivityIndicator size="small" color="white"/> : <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>RETRIEVE</Text>}
       </TouchableOpacity>
     </ScrollView>
   );

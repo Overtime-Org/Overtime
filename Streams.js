@@ -8,7 +8,7 @@ import { useAccount } from 'wagmi'
 
 const Tab = createMaterialTopTabNavigator();
 
-export default function Streams({connectionprop, refreshoutgoing, setrefreshoutgoing, deleted_refresh, setdeleted_refresh}) {
+export default function Streams({connectionprop}) {
   const isDarkMode = useColorScheme() === 'dark';
   const { address } = useAccount()
 
@@ -31,7 +31,7 @@ export default function Streams({connectionprop, refreshoutgoing, setrefreshoutg
         {() => {return <Incoming/>}}
       </Tab.Screen>
       <Tab.Screen name="Outgoing">
-        {() => {return <Outgoing refreshoutgoing={refreshoutgoing} setrefreshoutgoing={setrefreshoutgoing} deleted_refresh={deleted_refresh} setdeleted_refresh={setdeleted_refresh}/>}}
+        {() => {return <Outgoing/>}}
       </Tab.Screen>
     </Tab.Navigator>
   );
