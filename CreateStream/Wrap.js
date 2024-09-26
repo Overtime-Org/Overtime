@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { AntDesign } from '@expo/vector-icons';
-import { useContractWrite } from 'wagmi'
+import { useAccount, useContractRead, useContractWrite } from 'wagmi'
 import {celo} from 'viem/chains'
 import StableTokenV2 from '../abis/stabletokenv2.abi.json'
 import SuperToken from '../abis/supertoken.abi.json';
@@ -19,6 +19,20 @@ const Wrap = ({modalVisible, setModalVisible}) => {
   const [isFocused, setIsFocused] = useState(false);
   const [wrapamount, setWrapamount] = useState('');
   const [disableadd, setDisableadd] = useState(false);
+  const [skipapprove, setSkipapprove] = useState(false);
+
+  const { address } = useAccount();
+
+  var queryresult = useContractRead({
+    address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
+    abi: StableTokenV2,
+    functionName: 'allowance',
+    args: [
+      address == undefined ? "" : address.toLowerCase(),
+      '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e'
+    ],
+    chainId: celo.id
+  });    
 
   const wrap0write = useContractWrite({
     address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
@@ -42,7 +56,12 @@ const Wrap = ({modalVisible, setModalVisible}) => {
 
   async function wrap0(amount) {
     try {
-      wrap0write.write({args: ['0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e', amount]})
+      if ((wrapamount * 1000000000000000000) <= queryresult.data){
+        setSkipapprove(true);
+      }
+      else{
+        wrap0write.write({args: ['0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e', amount]});
+      }
     }
     catch (error) {}
   }
@@ -112,7 +131,7 @@ const Wrap = ({modalVisible, setModalVisible}) => {
             {wrap1write.isSuccess == true ? 
               (<Text style={{marginTop: 10, color: isDarkMode ? Colors.white : Colors.black}}>{wrapamount} cUSDx added successfully</Text>)
             :
-              (wrap0write.isSuccess == true ?
+              (wrap0write.isSuccess == true || skipapprove ?
                 <>
                   <Text style={{marginTop: 10, color: isDarkMode ? Colors.white : Colors.black}}>Finish adding {wrapamount} cUSDx</Text>
                   <TouchableOpacity
@@ -143,7 +162,7 @@ const Wrap = ({modalVisible, setModalVisible}) => {
                     disabled={disableadd}
                     onPress={() => {
                       if (wrapamount.length > 0 && isNaN(Number(wrapamount)) == false) {
-                        setDisableadd(true)
+                        queryresult.refetch().then(() => setDisableadd(true))
                       }
                     }}>
                     <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>ALLOW</Text>

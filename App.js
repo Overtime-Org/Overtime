@@ -76,7 +76,12 @@ function App() {
   return (
     <ApolloProvider client={client}>
       <WagmiConfig config={wagmiConfig}>
-        <NavigationContainer>
+        <NavigationContainer
+          theme={{
+            colors: {
+              background: isDarkMode ? Colors.darker : Colors.lighter
+            }
+          }}>
           <StatusBar style='auto'/>
           <Stack.Navigator>
             {disconnected ? 
@@ -95,7 +100,9 @@ function App() {
                       name="account"
                       style={{paddingVertical: 10, paddingHorizontal: 15, color: isDarkMode ? Colors.white : Colors.black}}
                       onPress={() => open()}
-                      size={24}/>}}>
+                      size={24}/>,
+                  headerShadowVisible: false
+                }}>
                 {() => {return <Streams connectionprop={connectionprop}/>}}
               </Stack.Screen>
               <Stack.Screen

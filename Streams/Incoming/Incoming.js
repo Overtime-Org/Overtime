@@ -37,9 +37,6 @@ export default function Incoming() {
 
   const navigation = useNavigation();
   const isDarkMode = useColorScheme() === 'dark';
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter
-  };
 
   //--------
   var cusdx = "0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e";
@@ -100,8 +97,7 @@ export default function Incoming() {
             )
           }}
           ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: '#ececec'}}></View>}
-          ListFooterComponent={() => <View style={{ height: 75}}/>}
-          style={backgroundStyle}/>
+          ListFooterComponent={() => <View style={{ height: 75}}/>}/>
       </>
     }
     <TouchableOpacity 

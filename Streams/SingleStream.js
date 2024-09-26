@@ -62,9 +62,6 @@ const SingleStream = ({route, connectionprop}) => {
   }
   
   const isDarkMode = useColorScheme() === 'dark';
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
   const width1st = () => {
     return (30 / 100) * Dimensions.get('window').width;
   };
@@ -91,7 +88,7 @@ const SingleStream = ({route, connectionprop}) => {
   : () => {}}
 
   return (
-    <View style={{ ...backgroundStyle, flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <View style={{ alignItems: 'center', justifyContent: 'space-evenly', flex: 0.6, paddingRight: 5 }}>
         <View style={{flexDirection: 'row'}}>
           <View style={{ width: width0, alignItems: 'flex-end', justifyContent: 'center'}}><Text style={{color: isDarkMode ? Colors.white : "#686C80", fontFamily: 'Rubik', fontSize: 15}}>{route.params.type === 'outgoing' ? "Receiver:" : "Sender:"}</Text></View>

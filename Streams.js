@@ -16,7 +16,7 @@ export default function Streams({connectionprop}) {
     if (address == undefined) {
       connectionprop(true);
     }
-  }, [address])
+  }, [address]);
 
   return (
     <Tab.Navigator

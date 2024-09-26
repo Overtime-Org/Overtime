@@ -167,7 +167,7 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
-    <ScrollView style={{ flex: 1, flexDirection: 'column', padding: 30, backgroundColor: isDarkMode ? Colors.darker : Colors.lighter }}>
+    <ScrollView style={{ flex: 1, flexDirection: 'column', padding: 30 }}>
       <FloatingLabelInput
         label="Address"
         value={receiver}

@@ -147,7 +147,7 @@ export default function Unwrap() {
   const amountChange = (newText) => setAmount(newText);
 
   return (
-    <ScrollView style={{ flex: 1, flexDirection: 'column', padding: 30, backgroundColor: isDarkMode ? Colors.darker : Colors.lighter }}>
+    <ScrollView style={{ flex: 1, flexDirection: 'column', padding: 30 }}>
       <FloatingLabelInput
         label="Amount"
         value={amount}
