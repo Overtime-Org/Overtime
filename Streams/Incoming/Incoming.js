@@ -46,13 +46,32 @@ export default function Incoming() {
   if (error) {return;}
   if (loading) {return;}
   //--------
+  let nostreamarr = [{nostreammsg: "No Incoming Stream"}];
 
   return (
     <>
     {address == undefined ?
-      <></>
+      (<></>)
     : 
-      <>
+      (data.account == null ?
+        <FlatList
+          data={nostreamarr}
+          contentContainerStyle={{alignItems: 'center', justifyContent: 'center', flex: 1}}
+          refreshControl={
+            <RefreshControl
+              colors={["#15D828"]}
+              refreshing={refreshing}
+              onRefresh={() => setRefreshing(true)}/>
+          }
+          renderItem={({nostreamobj, index}) => {
+            return(
+              <View>
+                <Text style={{color: isDarkMode ? Colors.white : "#686C80", fontSize: 18, fontWeight: '400', lineHeight: 26}}>{nostreamarr[index].nostreammsg}</Text>
+              </View>
+            )
+          }}
+          />
+      :
         <FlatList
           data={data.account.inflows}
           refreshControl={
@@ -98,7 +117,8 @@ export default function Incoming() {
           }}
           ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: '#ececec'}}></View>}
           ListFooterComponent={() => <View style={{ height: 75}}/>}/>
-      </>
+      )
+      
     }
     <TouchableOpacity 
       style={{

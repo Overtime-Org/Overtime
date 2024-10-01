@@ -54,12 +54,31 @@ function Outgoing() {
   if (loading) {return;}
   //--------
 
+  let nostreamarr = [{nostreammsg: "No Outgoing Stream"}];
+
   return (
     <>
     {address == undefined ?
-      <></>
+      (<></>)
     : 
-      <>
+      (data.account == null ?
+        <FlatList
+          data={nostreamarr}
+          contentContainerStyle={{alignItems: 'center', justifyContent: 'center', flex: 1}}
+          refreshControl={
+            <RefreshControl
+              colors={["#15D828"]}
+              refreshing={refreshing}
+              onRefresh={() => setRefreshing(true)}/>
+          }
+          renderItem={({nostreamobj, index}) => {
+            return(
+              <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1}}>
+                <Text style={{color: isDarkMode ? Colors.white : "#686C80", fontSize: 18, fontWeight: '400', lineHeight: 26}}>{nostreamarr[index].nostreammsg}</Text>
+              </View>
+            )
+          }}/>
+      :
         <FlatList
           data={data.account.outflows}
           refreshControl={
@@ -102,7 +121,7 @@ function Outgoing() {
           }}
           ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: '#ececec'}}></View>}
           ListFooterComponent={() => <View style={{ height: 75}}/>}/>
-      </>
+      )
     }
     <TouchableOpacity 
       style={{
