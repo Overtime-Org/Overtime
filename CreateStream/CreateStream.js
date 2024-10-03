@@ -65,6 +65,8 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
   const [receiver, setReceiver] = useState('');
   const [rate, setRate] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [buffer, setBuffer] = useState(0);
+  const [details, setDetails] = useState(false)
 
   const { address, connector } = useAccount()
   const provider = address == undefined ? undefined : connector._provider;
@@ -142,19 +144,25 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
   }, [creatingstream])
 
   useEffect(() => {
-    if (receiver == '' && creatingstream == true) {
+    if (receiver == '' && buffer == 0 && creatingstream == true) {
       setRate('');
     }
   }, [receiver])
 
   useEffect(() => {
-    if (receiver == '' && rate == '' && creatingstream == true) {
+    if (receiver == '' && rate == '' && buffer == 0 && creatingstream == true) {
       setcreatingstream(false)
     }
   }, [rate])
 
   useEffect(() => {
-    setReceiver('');
+    if (buffer == 0 && creatingstream == true) {
+      setReceiver('');
+    }
+  }, [buffer])
+
+  useEffect(() => {
+    setBuffer(0);
   }, [isSuccess]);
 
   useInterval(() => {
@@ -162,7 +170,15 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
   }, 3000)
 
   const receiverChange = (newText) => setReceiver(newText);
-  const rateChange = (newText) => setRate(newText);
+  const rateChange = (newText) => {
+    setRate(newText)
+    if (newText.length > 0 && isNaN(Number(newText)) == false) {
+      setBuffer(newText * 4) 
+    }
+    else if (newText.length == 0 || isNaN(Number(newText)) == true) {
+      setBuffer(0)
+    }
+  };
 
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -185,8 +201,35 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
         numUI={1}
       />
       <Wrap modalVisible={modalVisible} setModalVisible={setModalVisible}/>
-      <View style={{flexDirection: 'row', marginTop: 35, width: '100%'}}>
-        <View style={{width: '60%', alignItems: 'center', justifyContent: 'center'}}>
+      {details == true ?
+        <View style={{flexDirection: 'row', marginTop: 35, width: '100%', paddingHorizontal: 10, alignItems: 'flex-start', justifyContent: 'flex-start'}}>
+          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Upfront Buffer: {buffer} cUSDx</Text>
+        </View>
+      :
+        <></>
+      }
+      {details == true ?
+        <View style={{flexDirection: 'row', marginTop: 15, width: '100%', paddingHorizontal: 10, alignItems: 'flex-start', justifyContent: 'flex-start'}}>
+          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Minimum after Buffer: {Number(rate) * 24} cUSDx</Text>
+        </View>
+      :
+        <></>
+      }
+      <View style={{flexDirection: 'row', marginTop: details == true ? 15 : 35, width: '100%'}}>
+        <View style={{width: '60%', marginLeft: 10, alignItems: 'flex-start', justifyContent: 'flex-start'}}>
+          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Total Required: {rate.length > 0 && isNaN(Number(rate)) == false ? buffer + Number(rate) * 24 : 0} cUSDx</Text>
+        </View>
+        <View style={{width: '40%', alignItems: 'center', justifyContent: 'center'}}>
+          <TouchableOpacity
+            style={{borderRadius: 20, padding: 5}}
+            onPress={() => setDetails(!details)}>
+            <Text style={{fontWeight: '700', textDecorationLine: 'underline', color: '#15D828', marginLeft: 3, marginRight: 11}}>{details == false ? 'Details' : 'Hide'}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={{flexDirection: 'row', marginTop: 15, width: '100%'}}>
+        <View style={{width: '60%', marginLeft: 10, alignItems: 'flex-start', justifyContent: 'flex-start'}}>
           <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>{queryresult.isFetched ? Number(queryresult.data) / 1000000000 / 1000000000 : "--"} cUSDx</Text>
         </View>
         <View style={{width: '40%', alignItems: 'center', justifyContent: 'center'}}>
@@ -201,7 +244,14 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
       <TouchableOpacity
         style={{ marginTop: 40, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center', opacity: disabled == true ? 0.6 : 1 }}
         disabled={disabled}
-        onPress={() => setdisabled(true)}>
+        onPress={() => {
+          let regex = new RegExp(/^0x[a-fA-F0-9]{40}$/);
+          if (regex.test(receiver) == true && rate.length > 0 && isNaN(Number(rate)) == false) {
+            if (buffer + Number(rate) * 24 < Number(queryresult.data) / 1000000000 / 1000000000) {
+              setdisabled(true)
+            }
+          }
+        }}>
         {disabled == true ? <ActivityIndicator size="small" color="white"/> : <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>STREAM</Text>}
       </TouchableOpacity>
       {/* {isSuccess == true ? 
