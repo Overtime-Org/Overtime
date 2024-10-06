@@ -4,6 +4,7 @@ import Incoming from './Streams/Incoming/Incoming';
 import Outgoing from './Streams/Outgoing';
 import { useColorScheme } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
+import '@walletconnect/react-native-compat'
 import { useAccount } from 'wagmi'
 
 const Tab = createMaterialTopTabNavigator();

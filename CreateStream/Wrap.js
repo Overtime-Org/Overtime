@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { AntDesign } from '@expo/vector-icons';
-import { useAccount, useContractRead, useContractWrite } from 'wagmi'
+import '@walletconnect/react-native-compat'
+import { useAccount, useWriteContract, useReadContract } from 'wagmi'
 import {celo} from 'viem/chains'
 import StableTokenV2 from '../abis/stabletokenv2.abi.json'
 import SuperToken from '../abis/supertoken.abi.json';
@@ -21,9 +22,22 @@ const Wrap = ({modalVisible, setModalVisible}) => {
   const [disableadd, setDisableadd] = useState(false);
   const [skipapprove, setSkipapprove] = useState(false);
 
-  const { address } = useAccount();
+  const { address } = useAccount()
 
-  var queryresult = useContractRead({
+  const wrap0write = useWriteContract({
+    address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
+    abi: StableTokenV2,
+    functionName: 'approve',
+    chainId: celo.id
+  });
+  const wrap1write = useWriteContract({
+    address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
+    abi: SuperToken,
+    functionName: 'upgrade',
+    chainId: celo.id
+  });
+
+  var queryresult = useReadContract({
     address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
     abi: StableTokenV2,
     functionName: 'allowance',
@@ -31,19 +45,6 @@ const Wrap = ({modalVisible, setModalVisible}) => {
       address == undefined ? "" : address.toLowerCase(),
       '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e'
     ],
-    chainId: celo.id
-  });    
-
-  const wrap0write = useContractWrite({
-    address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
-    abi: StableTokenV2,
-    functionName: 'approve',
-    chainId: celo.id
-  });
-  const wrap1write = useContractWrite({
-    address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
-    abi: SuperToken,
-    functionName: 'upgrade',
     chainId: celo.id
   });
 
@@ -56,11 +57,11 @@ const Wrap = ({modalVisible, setModalVisible}) => {
 
   async function wrap0(amount) {
     try {
-      if ((wrapamount * 1000000000000000000) <= queryresult.data){
+      if ((wrapamount * 1000000000000000000) <= queryresult.data) {
         setSkipapprove(true);
       }
       else{
-        wrap0write.write({args: ['0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e', amount]});
+        wrap0write.writeContract({args: ['0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e', amount]})
       }
     }
     catch (error) {}
@@ -68,7 +69,7 @@ const Wrap = ({modalVisible, setModalVisible}) => {
 
   async function wrap1() {
     try {
-      wrap1write.write({args: [(wrapamount * 1000000000000000000).toString()]})
+      wrap1write.writeContract({args: [(wrapamount * 1000000000000000000).toString()]})
     }
     catch (error) {}
   }
@@ -168,7 +169,7 @@ const Wrap = ({modalVisible, setModalVisible}) => {
                     <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>ALLOW</Text>
                   </TouchableOpacity>
                 </>)
-              }
+            }
           </ScrollView>
         </View>
       </View>

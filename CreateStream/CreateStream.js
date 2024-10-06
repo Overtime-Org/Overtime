@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { AntDesign } from '@expo/vector-icons';
-import { useAccount, useContractRead, useContractWrite } from 'wagmi'
+import '@walletconnect/react-native-compat'
+import { useAccount, useReadContract, useWriteContract } from 'wagmi'
 import {celo} from 'viem/chains'
 import Wrap from './Wrap'
 import SuperToken from '../abis/supertoken.abi.json';
@@ -89,7 +90,7 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
     }, [delay]);
   }
 
-  var queryresult = useContractRead({
+  var queryresult = useReadContract({
     address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
     abi: SuperToken,
     functionName: 'balanceOf',
@@ -97,7 +98,7 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
     chainId: celo.id
   });
 
-  const { isSuccess, write } = useContractWrite({
+  const { isSuccess, writeContract } = useWriteContract({
     address: '0xcfA132E353cB4E398080B9700609bb008eceB125',
     abi: CFAv1Forwarder,
     functionName: 'createFlow',
@@ -113,7 +114,7 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
     try {
       if (provider != undefined) {
         const ratestr = await hourrate(rate);
-        write({args: [
+        writeContract({args: [
           '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
           address == undefined ? "" : address.toLowerCase(),
           receiver,

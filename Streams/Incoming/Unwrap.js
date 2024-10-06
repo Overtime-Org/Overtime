@@ -9,7 +9,8 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { useAccount, useContractRead, useContractWrite } from 'wagmi'
+import '@walletconnect/react-native-compat'
+import { useAccount, useReadContract, useWriteContract } from 'wagmi'
 import {celo} from 'viem/chains'
 import SuperToken from '../../abis/supertoken.abi.json';
 
@@ -91,7 +92,7 @@ export default function Unwrap() {
   const { address, connector } = useAccount()
   const provider = address == undefined ? undefined : connector._provider;
   
-  var queryresult = useContractRead({
+  var queryresult = useReadContract({
     address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
     abi: SuperToken,
     functionName: 'balanceOf',
@@ -99,7 +100,7 @@ export default function Unwrap() {
     chainId: celo.id
   });
   
-  const { data, isSuccess, write } = useContractWrite({
+  const { data, isSuccess, writeContract } = useWriteContract({
     address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
     abi: SuperToken,
     functionName: 'downgrade',
@@ -137,7 +138,7 @@ export default function Unwrap() {
   async function unwrap(amount) {
     try {
       if (provider != undefined){
-        write({args: [amount]});
+        writeContract({args: [amount]});
       }
     }
     catch (error) {setAmount('')}

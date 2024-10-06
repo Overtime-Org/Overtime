@@ -3,7 +3,8 @@ import { Text, View, useColorScheme, Dimensions, TouchableOpacity, Linking } fro
 import { useNavigation } from '@react-navigation/native'
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Octicons } from '@expo/vector-icons';
-import { useAccount, useContractWrite } from 'wagmi'
+import '@walletconnect/react-native-compat'
+import { useAccount, useWriteContract } from 'wagmi'
 import {celo} from 'viem/chains'
 import FlowingBalance from './FlowingBalance';
 import Elapsed from './Elapsed';
@@ -31,7 +32,7 @@ const SingleStream = ({route, connectionprop}) => {
     }
   }, [deleting]);
 
-  const deleteflowwrite = useContractWrite({
+  const deleteflowwrite = useWriteContract({
     address: '0xcfA132E353cB4E398080B9700609bb008eceB125',
     abi: CFAv1Forwarder,
     functionName: 'deleteFlow',
@@ -43,7 +44,7 @@ const SingleStream = ({route, connectionprop}) => {
   async function funcdeleteflow(){
     try {
       if (provider != undefined){
-        deleteflowwrite.write({args: [
+        deleteflowwrite.writeContract({args: [
           '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
           address == undefined ? "" : address.toLowerCase(),
           route.params.name,

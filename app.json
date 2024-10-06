@@ -16,7 +16,12 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "ke.co.mungeian"
+      "bundleIdentifier": "ke.co.mungeian",
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": [
+          "valora"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -28,6 +33,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "./queries.js"
+    ]
   }
 }

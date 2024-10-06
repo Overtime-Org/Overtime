@@ -7,9 +7,10 @@ import SingleStream from './Streams/SingleStream';
 import CreateStream from './CreateStream/CreateStream'
 import Unwrap from './Streams/Incoming/Unwrap';
 import '@walletconnect/react-native-compat'
-import { WagmiConfig } from 'wagmi'
+import { WagmiProvider } from 'wagmi'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { celo } from 'viem/chains'
-import { createWeb3Modal, defaultWagmiConfig, Web3Modal, useWeb3Modal } from '@web3modal/wagmi-react-native'
+import { createAppKit, defaultWagmiConfig, AppKit, useAppKit } from '@reown/appkit-wagmi-react-native';
 import {PROJECT_NAME, PROJECT_DESCRIPTION} from '@env';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from 'react-native';
@@ -17,6 +18,8 @@ import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { StatusBar } from 'expo-status-bar';
 import { ApolloProvider, ApolloClient } from '@apollo/client';
 import { HttpLink, InMemoryCache } from 'apollo-boost';
+
+const queryClient = new QueryClient();
 
 const projectId = process.env['PROJECT_ID'];
 
@@ -28,11 +31,10 @@ const metadata = {
 
 const chains = [celo]
 
-const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata })
+const wagmiConfig = defaultWagmiConfig({chains, projectId, metadata});
 
-createWeb3Modal({
+createAppKit({
   projectId,
-  chains,
   wagmiConfig,
   tokens: {
     42220: {
@@ -71,87 +73,89 @@ function App() {
   }, [creatingstream])
 
   const isDarkMode = useColorScheme() === 'dark';
-  const { open } = useWeb3Modal()
+  const { open } = useAppKit();
 
   return (
     <ApolloProvider client={client}>
-      <WagmiConfig config={wagmiConfig}>
-        <NavigationContainer
-          theme={{
-            colors: {
-              background: isDarkMode ? Colors.darker : Colors.lighter
-            }
-          }}>
-          <StatusBar style='auto'/>
-          <Stack.Navigator>
-            {disconnected ? 
-              <Stack.Screen name="ConnectWallet" options={{ headerShown: false }}>
-                {() => {return <ConnectWallet connectionprop={connectionprop}/>}}
-              </Stack.Screen>
-            : <>
-              <Stack.Screen
-                name="Streams"
-                options={{
-                  headerStyle: {backgroundColor: isDarkMode ? Colors.darker : Colors.lighter},
-                  headerTitle: "Overtime",
-                  headerTitleStyle: {color: isDarkMode ? Colors.white : Colors.black},
-                  headerRight: () => 
-                    <MaterialCommunityIcons 
-                      name="account"
-                      style={{paddingVertical: 10, paddingHorizontal: 15, color: isDarkMode ? Colors.white : Colors.black}}
-                      onPress={() => open()}
-                      size={24}/>,
-                  headerShadowVisible: false
-                }}>
-                {() => {return <Streams connectionprop={connectionprop}/>}}
-              </Stack.Screen>
-              <Stack.Screen
-                name="SingleStream"
-                options={{
-                  headerStyle: {backgroundColor: isDarkMode ? Colors.darker : Colors.lighter},
-                  headerBackImage: () => <Ionicons name="arrow-back" style={{color: isDarkMode ? Colors.white : Colors.black}} size={24} />,
-                  headerTitle: "",
-                  headerRight: () => 
-                    <MaterialCommunityIcons
-                      name="account"
-                      style={{paddingVertical: 10, paddingHorizontal: 15, color: isDarkMode ? Colors.white : Colors.black}}
-                      onPress={() => open()}
-                      size={24}/>}}>
-                {(props) => {return <SingleStream {...props} connectionprop={connectionprop}/>}}
-              </Stack.Screen>
-              <Stack.Screen
-                name="CreateStream"
-                options={{
-                  headerStyle: {backgroundColor: isDarkMode ? Colors.darker : Colors.lighter},
-                  headerBackImage: () => <Ionicons name="arrow-back" style={{color: isDarkMode ? Colors.white : Colors.black}} size={24} />,
-                  headerTitle: "",
-                  headerRight: () =>
-                    <MaterialCommunityIcons
-                      name="account"
-                      style={{paddingVertical: 10, paddingHorizontal: 15, color: isDarkMode ? Colors.white : Colors.black}}
-                      onPress={() => open()}
-                      size={24}/>}}>
-                {() => {return <CreateStream connectionprop={connectionprop} setdisabled={setDisabled} disabled={disabled} setrefreshoutgoing={setRefreshoutgoing} setcreatingstream={setCreatingstream} creatingstream={creatingstream}/>}}
-              </Stack.Screen>
-              <Stack.Screen
-                name="Unwrap"
-                options={{
-                  headerStyle: {backgroundColor: isDarkMode ? Colors.darker : Colors.lighter},
-                  headerBackImage: () => <Ionicons name="arrow-back" style={{color: isDarkMode ? Colors.white : Colors.black}} size={24} />,
-                  headerTitle: "",
-                  headerRight: () =>
-                    <MaterialCommunityIcons
-                      name="account"
-                      style={{paddingVertical: 10, paddingHorizontal: 15, color: isDarkMode ? Colors.white : Colors.black}}
-                      onPress={() => open()}
-                      size={24}/>}}>
-                {() => {return <Unwrap />}}
-              </Stack.Screen>
-              </>}
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <NavigationContainer
+            theme={{
+              colors: {
+                background: isDarkMode ? Colors.darker : Colors.lighter
+              }
+            }}>
+            <StatusBar style='auto'/>
+            <Stack.Navigator>
+              {disconnected ? 
+                <Stack.Screen name="ConnectWallet" options={{ headerShown: false }}>
+                  {() => {return <ConnectWallet connectionprop={connectionprop}/>}}
+                </Stack.Screen>
+              : <>
+                <Stack.Screen
+                  name="Streams"
+                  options={{
+                    headerStyle: {backgroundColor: isDarkMode ? Colors.darker : Colors.lighter},
+                    headerTitle: "Overtime",
+                    headerTitleStyle: {color: isDarkMode ? Colors.white : Colors.black},
+                    headerShadowVisible: false,
+                    headerRight: () => 
+                      <MaterialCommunityIcons 
+                        name="account"
+                        style={{paddingVertical: 10, paddingHorizontal: 15, color: isDarkMode ? Colors.white : Colors.black}}
+                        onPress={() => open()}
+                        size={24}/>
+                  }}>
+                  {() => {return <Streams connectionprop={connectionprop}/>}}
+                </Stack.Screen>
+                <Stack.Screen
+                  name="SingleStream"
+                  options={{
+                    headerStyle: {backgroundColor: isDarkMode ? Colors.darker : Colors.lighter},
+                    headerBackImage: () => <Ionicons name="arrow-back" style={{color: isDarkMode ? Colors.white : Colors.black}} size={24} />,
+                    headerTitle: "",
+                    headerRight: () => 
+                      <MaterialCommunityIcons
+                        name="account"
+                        style={{paddingVertical: 10, paddingHorizontal: 15, color: isDarkMode ? Colors.white : Colors.black}}
+                        onPress={() => open()}
+                        size={24}/>}}>
+                  {(props) => {return <SingleStream {...props} connectionprop={connectionprop}/>}}
+                </Stack.Screen>
+                <Stack.Screen
+                  name="CreateStream"
+                  options={{
+                    headerStyle: {backgroundColor: isDarkMode ? Colors.darker : Colors.lighter},
+                    headerBackImage: () => <Ionicons name="arrow-back" style={{color: isDarkMode ? Colors.white : Colors.black}} size={24} />,
+                    headerTitle: "",
+                    headerRight: () =>
+                      <MaterialCommunityIcons
+                        name="account"
+                        style={{paddingVertical: 10, paddingHorizontal: 15, color: isDarkMode ? Colors.white : Colors.black}}
+                        onPress={() => open()}
+                        size={24}/>}}>
+                  {() => {return <CreateStream connectionprop={connectionprop} setdisabled={setDisabled} disabled={disabled} setrefreshoutgoing={setRefreshoutgoing} setcreatingstream={setCreatingstream} creatingstream={creatingstream}/>}}
+                </Stack.Screen>
+                <Stack.Screen
+                  name="Unwrap"
+                  options={{
+                    headerStyle: {backgroundColor: isDarkMode ? Colors.darker : Colors.lighter},
+                    headerBackImage: () => <Ionicons name="arrow-back" style={{color: isDarkMode ? Colors.white : Colors.black}} size={24} />,
+                    headerTitle: "",
+                    headerRight: () =>
+                      <MaterialCommunityIcons
+                        name="account"
+                        style={{paddingVertical: 10, paddingHorizontal: 15, color: isDarkMode ? Colors.white : Colors.black}}
+                        onPress={() => open()}
+                        size={24}/>}}>
+                  {() => {return <Unwrap />}}
+                </Stack.Screen>
+                </>}
             </Stack.Navigator>
-        </NavigationContainer>
-        <Web3Modal/>
-      </WagmiConfig>
+          </NavigationContainer>
+          <AppKit/>
+        </QueryClientProvider>
+      </WagmiProvider>
     </ApolloProvider>
   );
 }

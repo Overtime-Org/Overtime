@@ -1,10 +1,11 @@
 import React, {useEffect} from 'react';
 import { Text, View, TouchableOpacity, ActivityIndicator } from "react-native";
-import { useWeb3Modal } from '@web3modal/wagmi-react-native'
+import { useAppKit } from '@reown/appkit-wagmi-react-native';
+import '@walletconnect/react-native-compat'
 import { useAccount } from 'wagmi'
 
 function ConnectWallet({connectionprop}) {
-  const { open } = useWeb3Modal()
+  const { open } = useAppKit()
   const { isDisconnected, isConnecting } = useAccount()
   
   useEffect(() => {

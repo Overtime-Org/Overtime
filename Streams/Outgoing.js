@@ -9,6 +9,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { AntDesign } from '@expo/vector-icons';
+import '@walletconnect/react-native-compat'
 import { useAccount } from 'wagmi'
 import { useQuery, gql } from '@apollo/client';
 

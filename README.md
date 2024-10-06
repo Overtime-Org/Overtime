@@ -9,6 +9,8 @@ Run these from terminal/cli
 
 ```cd Overtime/```
 
+```git checkout reown```
+
 ```npm install```
 
 Rename ```.env.example``` file to ```.env```

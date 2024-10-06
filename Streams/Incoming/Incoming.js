@@ -3,6 +3,7 @@ import { Text, View, FlatList, TouchableOpacity, RefreshControl, useColorScheme 
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { useQuery, gql } from '@apollo/client';
+import '@walletconnect/react-native-compat'
 import { useAccount } from 'wagmi'
 
 const QUERY = gql`
