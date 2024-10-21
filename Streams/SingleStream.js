@@ -15,8 +15,7 @@ const SingleStream = ({route, connectionprop}) => {
   const [deleting, isDeleting] = useState(false);
   const [stylestate, setStylestate] = useState('outline');
 
-  const { address, connector } = useAccount();
-  const provider = address == undefined ? undefined : connector._provider;
+  const { address, isDisconnected } = useAccount();
   
   useEffect(() => {
     if (address == undefined) {
@@ -32,24 +31,25 @@ const SingleStream = ({route, connectionprop}) => {
     }
   }, [deleting]);
 
-  const deleteflowwrite = useWriteContract({
-    address: '0xcfA132E353cB4E398080B9700609bb008eceB125',
-    abi: CFAv1Forwarder,
-    functionName: 'deleteFlow',
-    chainId: celo.id
-  });
+  const deleteflowwrite = useWriteContract();
 
   const navigation = useNavigation();
 
   async function funcdeleteflow(){
     try {
-      if (provider != undefined){
-        deleteflowwrite.writeContract({args: [
-          '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
-          address == undefined ? "" : address.toLowerCase(),
-          route.params.name,
-          address == undefined ? "" : address.toLowerCase()
-        ]});
+      if (isDisconnected == false){
+        deleteflowwrite.writeContract({
+          address: '0xcfA132E353cB4E398080B9700609bb008eceB125',
+          abi: CFAv1Forwarder,
+          functionName: 'deleteFlow',
+          chainId: celo.id,
+          args: [
+            '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
+            address == undefined ? "" : address.toLowerCase(),
+            route.params.name,
+            address == undefined ? "" : address.toLowerCase()
+          ]
+        });
       }
     }
     catch (error) {

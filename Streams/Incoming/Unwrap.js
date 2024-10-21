@@ -89,8 +89,7 @@ export default function Unwrap() {
     }
   }, [amount]);
 
-  const { address, connector } = useAccount()
-  const provider = address == undefined ? undefined : connector._provider;
+  const { address, isDisconnected } = useAccount()
   
   var queryresult = useReadContract({
     address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
@@ -100,12 +99,7 @@ export default function Unwrap() {
     chainId: celo.id
   });
   
-  const { data, isSuccess, writeContract } = useWriteContract({
-    address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
-    abi: SuperToken,
-    functionName: 'downgrade',
-    chainId: celo.id
-  });
+  const { data, isSuccess, writeContract } = useWriteContract();
 
   useEffect(() => {
     if (isSuccess == true) {
@@ -137,8 +131,14 @@ export default function Unwrap() {
 
   async function unwrap(amount) {
     try {
-      if (provider != undefined){
-        writeContract({args: [amount]});
+      if (isDisconnected == false){
+        writeContract({
+          address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
+          abi: SuperToken,
+          functionName: 'downgrade',
+          chainId: celo.id,
+          args: [amount]
+        });
       }
     }
     catch (error) {setAmount('')}

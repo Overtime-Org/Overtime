@@ -69,8 +69,7 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
   const [buffer, setBuffer] = useState(0);
   const [details, setDetails] = useState(false)
 
-  const { address, connector } = useAccount()
-  const provider = address == undefined ? undefined : connector._provider;
+  const { address, isDisconnected } = useAccount()
 
   function useInterval(callback, delay) {
     const savedCallback = useRef();
@@ -98,12 +97,7 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
     chainId: celo.id
   });
 
-  const { isSuccess, writeContract } = useWriteContract({
-    address: '0xcfA132E353cB4E398080B9700609bb008eceB125',
-    abi: CFAv1Forwarder,
-    functionName: 'createFlow',
-    chainId: celo.id
-  });
+  const { isSuccess, writeContract } = useWriteContract();
 
   async function hourrate(rate){
     var rateweips = (rate * 1000000000000000000) / 3600
@@ -112,15 +106,21 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
 
   async function createflow(receiver, rate) {
     try {
-      if (provider != undefined) {
+      if (isDisconnected == false) {
         const ratestr = await hourrate(rate);
-        writeContract({args: [
-          '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
-          address == undefined ? "" : address.toLowerCase(),
-          receiver,
-          ratestr,
-          address == undefined ? "" : address.toLowerCase()
-        ]});
+        writeContract({
+          address: '0xcfA132E353cB4E398080B9700609bb008eceB125',
+          abi: CFAv1Forwarder,
+          functionName: 'createFlow',
+          chainId: celo.id,
+          args: [
+            '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
+            address == undefined ? "" : address.toLowerCase(),
+            receiver,
+            ratestr,
+            address == undefined ? "" : address.toLowerCase()
+          ]
+        });
       }
     }
     catch (error) {}

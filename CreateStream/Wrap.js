@@ -24,18 +24,8 @@ const Wrap = ({modalVisible, setModalVisible}) => {
 
   const { address } = useAccount()
 
-  const wrap0write = useWriteContract({
-    address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
-    abi: StableTokenV2,
-    functionName: 'approve',
-    chainId: celo.id
-  });
-  const wrap1write = useWriteContract({
-    address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
-    abi: SuperToken,
-    functionName: 'upgrade',
-    chainId: celo.id
-  });
+  const wrap0write = useWriteContract();
+  const wrap1write = useWriteContract();
 
   var queryresult = useReadContract({
     address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
@@ -61,7 +51,13 @@ const Wrap = ({modalVisible, setModalVisible}) => {
         setSkipapprove(true);
       }
       else{
-        wrap0write.writeContract({args: ['0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e', amount]})
+        wrap0write.writeContract({
+          address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
+          abi: StableTokenV2,
+          functionName: 'approve',
+          chainId: celo.id,
+          args: ['0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e', amount]
+        })
       }
     }
     catch (error) {}
@@ -69,7 +65,13 @@ const Wrap = ({modalVisible, setModalVisible}) => {
 
   async function wrap1() {
     try {
-      wrap1write.writeContract({args: [(wrapamount * 1000000000000000000).toString()]})
+      wrap1write.writeContract({
+        address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
+        abi: SuperToken,
+        functionName: 'upgrade',
+        chainId: celo.id,
+        args: [(wrapamount * 1000000000000000000).toString()]
+      })
     }
     catch (error) {}
   }
