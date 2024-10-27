@@ -16,6 +16,7 @@ import {celo} from 'viem/chains'
 import Wrap from './Wrap'
 import SuperToken from '../abis/supertoken.abi.json';
 import CFAv1Forwarder from '../abis/cfav1forwarder.abi.json';
+import BigNumber from "bignumber.js";
 
 function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype, numUI}) {
   const [isFocused, setIsFocused] = useState(false);
@@ -66,10 +67,12 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
   const [receiver, setReceiver] = useState('');
   const [rate, setRate] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [buffer, setBuffer] = useState(0);
+  const [buffer, setBuffer] = useState(BigNumber(0));
   const [details, setDetails] = useState(false)
 
   const { address, isDisconnected } = useAccount()
+
+  let minafterbuffer = BigNumber(rate).times(24);
 
   function useInterval(callback, delay) {
     const savedCallback = useRef();
@@ -100,8 +103,8 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
   const { isSuccess, writeContract } = useWriteContract();
 
   async function hourrate(rate){
-    var rateweips = (rate * 1000000000000000000) / 3600
-    return Math.ceil(rateweips).toString()
+    var rateweips = (BigNumber(rate).times(BigNumber('1000000000000000000'))).dividedBy(3600)
+    return rateweips.toFormat(0, BigNumber.ROUND_CEIL, {groupSeparator: ''})
   }
 
   async function createflow(receiver, rate) {
@@ -145,25 +148,25 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
   }, [creatingstream])
 
   useEffect(() => {
-    if (receiver == '' && buffer == 0 && creatingstream == true) {
+    if (receiver == '' && buffer.eq(BigNumber(0)) && creatingstream == true) {
       setRate('');
     }
   }, [receiver])
 
   useEffect(() => {
-    if (receiver == '' && rate == '' && buffer == 0 && creatingstream == true) {
+    if (receiver == '' && rate == '' && buffer.eq(BigNumber(0)) && creatingstream == true) {
       setcreatingstream(false)
     }
   }, [rate])
 
   useEffect(() => {
-    if (buffer == 0 && creatingstream == true) {
+    if (buffer.eq(BigNumber(0)) && creatingstream == true) {
       setReceiver('');
     }
   }, [buffer])
 
   useEffect(() => {
-    setBuffer(0);
+    setBuffer(BigNumber(0))
   }, [isSuccess]);
 
   useInterval(() => {
@@ -173,12 +176,14 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
   const receiverChange = (newText) => setReceiver(newText);
   const rateChange = (newText) => {
     setRate(newText)
-    if (newText.length > 0 && isNaN(Number(newText)) == false) {
-      setBuffer(newText * 4) 
+    
+    if (newText.length > 0 && BigNumber(newText).isNaN() == false && BigNumber(newText).isFinite() == true) {
+      setBuffer(BigNumber(newText).times(4))
     }
-    else if (newText.length == 0 || isNaN(Number(newText)) == true) {
-      setBuffer(0)
+    else if (newText.length == 0 || BigNumber(newText).isNaN() == true || BigNumber(newText).isFinite() == false) {
+      setBuffer(BigNumber(0))
     }
+    
   };
 
   const isDarkMode = useColorScheme() === 'dark';
@@ -204,21 +209,21 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
       <Wrap modalVisible={modalVisible} setModalVisible={setModalVisible}/>
       {details == true ?
         <View style={{flexDirection: 'row', marginTop: 35, width: '100%', paddingHorizontal: 10, alignItems: 'flex-start', justifyContent: 'flex-start'}}>
-          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Upfront Buffer: {buffer} cUSDx</Text>
+          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Upfront Buffer: {String(buffer)} cUSDx</Text>
         </View>
       :
         <></>
       }
       {details == true ?
         <View style={{flexDirection: 'row', marginTop: 15, width: '100%', paddingHorizontal: 10, alignItems: 'flex-start', justifyContent: 'flex-start'}}>
-          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Minimum after Buffer: {Number(rate) * 24} cUSDx</Text>
+          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Minimum after Buffer: {minafterbuffer.isNaN() ? 0 : String(minafterbuffer)} cUSDx</Text>
         </View>
       :
         <></>
       }
       <View style={{flexDirection: 'row', marginTop: details == true ? 15 : 35, width: '100%'}}>
         <View style={{width: '60%', marginLeft: 10, alignItems: 'flex-start', justifyContent: 'flex-start'}}>
-          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Total Required: {rate.length > 0 && isNaN(Number(rate)) == false ? buffer + Number(rate) * 24 : 0} cUSDx</Text>
+          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Total Required: {rate.length > 0 && BigNumber(rate).isNaN() == false ? String(buffer.plus(minafterbuffer)) : 0} cUSDx</Text>
         </View>
         <View style={{width: '40%', alignItems: 'center', justifyContent: 'center'}}>
           <TouchableOpacity
@@ -231,7 +236,7 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
 
       <View style={{flexDirection: 'row', marginTop: 15, width: '100%'}}>
         <View style={{width: '60%', marginLeft: 10, alignItems: 'flex-start', justifyContent: 'flex-start'}}>
-          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>{queryresult.isFetched ? Number(queryresult.data) / 1000000000 / 1000000000 : "--"} cUSDx</Text>
+          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>{queryresult.isFetched ? String(BigNumber(queryresult.data).dividedBy(BigNumber('1000000000000000000'))) : "--"} cUSDx</Text>
         </View>
         <View style={{width: '40%', alignItems: 'center', justifyContent: 'center'}}>
           <TouchableOpacity
@@ -247,8 +252,8 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
         disabled={disabled}
         onPress={() => {
           let regex = new RegExp(/^0x[a-fA-F0-9]{40}$/);
-          if (regex.test(receiver) == true && rate.length > 0 && isNaN(Number(rate)) == false) {
-            if (buffer + Number(rate) * 24 < Number(queryresult.data) / 1000000000 / 1000000000) {
+          if (regex.test(receiver) == true && rate.length > 0 && BigNumber(rate).isNaN() == false && BigNumber(rate).isFinite() == true) {
+            if (buffer.plus(minafterbuffer).lt(BigNumber(queryresult.data).dividedBy(BigNumber('1000000000000000000')))) {
               setdisabled(true)
             }
           }
