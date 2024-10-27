@@ -31,14 +31,21 @@ const SingleStream = ({route, connectionprop}) => {
     }
   }, [deleting]);
 
-  const deleteflowwrite = useWriteContract();
+  const {isSuccess, writeContract} = useWriteContract();
 
   const navigation = useNavigation();
+
+  useEffect(() => {
+    if (isSuccess == true) {
+      isDeleting(false);
+      navigation.goBack();
+    }
+  }, [isSuccess])
 
   async function funcdeleteflow(){
     try {
       if (isDisconnected == false){
-        deleteflowwrite.writeContract({
+        writeContract({
           address: '0xcfA132E353cB4E398080B9700609bb008eceB125',
           abi: CFAv1Forwarder,
           functionName: 'deleteFlow',
@@ -55,11 +62,6 @@ const SingleStream = ({route, connectionprop}) => {
     catch (error) {
       isDeleting(false)
     }
-  }
-
-  async function deleteflowsuccess() {
-    isDeleting(false);
-    navigation.goBack();
   }
   
   const isDarkMode = useColorScheme() === 'dark';
@@ -83,10 +85,6 @@ const SingleStream = ({route, connectionprop}) => {
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   let starteddate = new Date(route.params.started * 1000)
   var startdisplay = starteddate.getUTCDate()+"-"+months[starteddate.getUTCMonth()]+"-"+starteddate.getUTCFullYear()+" "+starteddate.toISOString().split('T')[1].split('.')[0]+" UTC"
-
-  {deleteflowwrite.isSuccess == true ?
-    () => deleteflowsuccess()
-  : () => {}}
 
   return (
     <View style={{ flex: 1 }}>
