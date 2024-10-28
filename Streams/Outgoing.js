@@ -55,6 +55,8 @@ function Outgoing() {
   if (loading) {return;}
   //--------
 
+  startPolling(500);
+
   let nostreamarr = [{nostreammsg: "No Outgoing Stream"}];
 
   return (
