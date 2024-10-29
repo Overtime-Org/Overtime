@@ -41,8 +41,9 @@ export default function Incoming() {
 
   //--------
   var cusdx = "0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e";
-  const { loading, error, data, startPolling, refetch } = useQuery(QUERY, { 
-    variables: { id: address == undefined ? "" : address.toLowerCase(), idt: cusdx } 
+  const { loading, error, data, refetch } = useQuery(QUERY, { 
+    variables: { id: address == undefined ? "" : address.toLowerCase(), idt: cusdx },
+    pollInterval: 500
   });
   if (error) {return;}
   if (loading) {return;}
