@@ -13,6 +13,18 @@ import '@walletconnect/react-native-compat'
 import { useAccount, useReadContract, useWriteContract } from 'wagmi'
 import {celo} from 'viem/chains'
 import SuperToken from '../../abis/supertoken.abi.json';
+import { useQuery, gql } from '@apollo/client';
+import BigNumber from "bignumber.js";
+
+const QUERY = gql`
+  query ($id: ID!, $idt: ID!) {
+    account(id: $id) {
+      accountTokenSnapshots(where: {token_: {id: $idt}}) {
+        totalNetFlowRate
+      }
+    }
+  }
+`;
 
 function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype, readonly}) {
   const [isFocused, setIsFocused] = useState(false);
@@ -91,7 +103,7 @@ export default function Unwrap() {
 
   const { address, isDisconnected } = useAccount()
   
-  var queryresult = useReadContract({
+  var querybalance = useReadContract({
     address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
     abi: SuperToken,
     functionName: 'balanceOf',
@@ -100,6 +112,8 @@ export default function Unwrap() {
   });
   
   const { data, isSuccess, writeContract } = useWriteContract();
+
+  
 
   useEffect(() => {
     if (isSuccess == true) {
@@ -126,7 +140,7 @@ export default function Unwrap() {
   }
 
   useInterval(() => {
-    queryresult.refetch()
+    querybalance.refetch()
   }, 3000)
 
   async function unwrap(amount) {
@@ -147,6 +161,16 @@ export default function Unwrap() {
   const isDarkMode = useColorScheme() === 'dark';
   const amountChange = (newText) => setAmount(newText);
 
+  //--------
+  var cusdx = "0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e";
+  const querybalanceinfo = useQuery(QUERY, { 
+    variables: { id: address == undefined ? "" : address.toLowerCase(), idt: cusdx },
+    pollInterval: 500
+  });
+  if (querybalanceinfo.error) {return;}
+  if (querybalanceinfo.loading) {return;}
+  //--------
+
   return (
     <ScrollView style={{ flex: 1, flexDirection: 'column', padding: 30 }}>
       <FloatingLabelInput
@@ -157,7 +181,35 @@ export default function Unwrap() {
         keyboardtype="numeric"
         readonly={readonly}
       />
-      <Text style={{color: isDarkMode ? Colors.white : Colors.black, marginTop: 20}}>{queryresult.isFetched ? Number(queryresult.data) / 1000000000 / 1000000000 : "--"} cUSDx</Text>
+      <Text style={{color: isDarkMode ? Colors.white : Colors.black, marginTop: 20}}>{querybalance.isFetched ? String(BigNumber(querybalance.data).dividedBy(BigNumber('1000000000000000000'))) : "--"} cUSDx</Text>
+      <View style={{flexDirection: 'row'}}>
+        <Text style={{color: isDarkMode ? Colors.white : Colors.black, marginTop: 3}}>Net Flow Rate: </Text>
+        {
+          querybalance.isFetched && BigNumber(querybalance.data).eq(BigNumber(0)) ?
+            (<Text style={{color: isDarkMode ? Colors.white : Colors.black, marginTop: 3}}>Zero</Text>)
+          :
+            (
+              querybalanceinfo.data.account == null ?
+                (<></>)
+              :
+                (
+                  BigNumber(querybalanceinfo.data.account.accountTokenSnapshots[0].totalNetFlowRate).eq(BigNumber(0)) ?
+                    (<Text style={{color: isDarkMode ? Colors.white : Colors.black, marginTop: 3}}>Zero</Text>)
+                  :
+                    (
+                      BigNumber(querybalanceinfo.data.account.accountTokenSnapshots[0].totalNetFlowRate).lt(BigNumber(0)) ?
+                        (<Text style={{color: "#FA0514", marginTop: 3}}>Negative</Text>)
+                      :
+                        (
+                          BigNumber(querybalanceinfo.data.account.accountTokenSnapshots[0].totalNetFlowRate).gt(BigNumber(0)) ?
+                            (<Text style={{color: "#15D828", marginTop: 3}}>Positive</Text>)
+                          : (<></>)
+                        )
+                    )
+                )
+            )
+        }
+      </View>
       <TouchableOpacity
         style={{ marginTop: 40, alignSelf: 'center', width: 190, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center', opacity: disabled == true ? 0.6 : 1 }}
         disabled={disabled}

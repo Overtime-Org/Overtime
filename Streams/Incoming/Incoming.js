@@ -96,7 +96,17 @@ export default function Incoming() {
                     alignItems: 'center'
                   }}
                 onPress={() => {
-                  navigation.navigate('SingleStream', {type: 'incoming', name: data.account.inflows[index].sender.id, elapsed: elapsed, streamed: numstreamed, rate: data.account.inflows[index].currentFlowRate, started: data.account.inflows[index].createdAtTimestamp, url: data.account.inflows[index].flowUpdatedEvents[0].transactionHash, streameduntilupdatedat: data.account.inflows[index].streamedUntilUpdatedAt, updatedattimestamp: data.account.inflows[index].updatedAtTimestamp})
+                  navigation.navigate('SingleStream', {
+                    type: 'incoming',
+                    name: data.account.inflows[index].sender.id,
+                    elapsed: elapsed,
+                    streamed: numstreamed,
+                    rate: data.account.inflows[index].currentFlowRate,
+                    started: data.account.inflows[index].createdAtTimestamp,
+                    url: data.account.inflows[index].flowUpdatedEvents[0].transactionHash,
+                    streameduntilupdatedat: data.account.inflows[index].streamedUntilUpdatedAt,
+                    updatedattimestamp: data.account.inflows[index].updatedAtTimestamp
+                  })
                 }}
                 >
                 <View style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center' }}>

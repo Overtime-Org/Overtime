@@ -102,7 +102,17 @@ function Outgoing() {
                   flex: 3,
                   alignItems: 'center'
                 }}
-                onPress={() => navigation.navigate('SingleStream', {type: 'outgoing', name: data.account.outflows[index].receiver.id, elapsed: elapsed, streamed: numstreamed, rate: data.account.outflows[index].currentFlowRate, started: data.account.outflows[index].createdAtTimestamp, url: data.account.outflows[index].flowUpdatedEvents[0].transactionHash, updatedattimestamp: data.account.outflows[index].updatedAtTimestamp, streameduntilupdatedat: data.account.outflows[index].streamedUntilUpdatedAt})}>
+                onPress={() => navigation.navigate('SingleStream', {
+                  type: 'outgoing',
+                  name: data.account.outflows[index].receiver.id,
+                  elapsed: elapsed,
+                  streamed: numstreamed,
+                  rate: data.account.outflows[index].currentFlowRate,
+                  started: data.account.outflows[index].createdAtTimestamp,
+                  url: data.account.outflows[index].flowUpdatedEvents[0].transactionHash,
+                  updatedattimestamp: data.account.outflows[index].updatedAtTimestamp,
+                  streameduntilupdatedat: data.account.outflows[index].streamedUntilUpdatedAt
+                })}>
                 <View style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center' }}>
                   <View style={{width: 48, height: 48, backgroundColor: '#E7E7E7', borderRadius: 32, justifyContent: 'center', alignItems: 'center'}}>
                     <Text style={{color: '#989CB0', fontSize: 24, fontFamily: 'Rubik', fontWeight: '600'}}>{data.account.outflows[index].receiver.id.charAt(0)}</Text>
