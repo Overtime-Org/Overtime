@@ -10,6 +10,7 @@ const QUERY = gql`
   query ($id: ID!, $idt: ID!) {
     account(id: $id) {
       inflows(where: {currentFlowRate_gt: "0", token_: {id: $idt}}) {
+        id
         currentFlowRate
         sender {
           id
@@ -98,6 +99,7 @@ export default function Incoming() {
                 onPress={() => {
                   navigation.navigate('SingleStream', {
                     type: 'incoming',
+                    flowid: data.account.inflows[index].id,
                     name: data.account.inflows[index].sender.id,
                     elapsed: elapsed,
                     streamed: numstreamed,

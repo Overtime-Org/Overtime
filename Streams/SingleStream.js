@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View, useColorScheme, Dimensions, TouchableOpacity, Linking } from "react-native";
 import { useNavigation } from '@react-navigation/native'
 import { Colors } from 'react-native/Libraries/NewAppScreen';
@@ -10,10 +10,42 @@ import FlowingBalance from './FlowingBalance';
 import Elapsed from './Elapsed';
 import BalanceTemp from './BalanceTemp';
 import CFAv1Forwarder from '../abis/cfav1forwarder.abi.json';
+import { gql, useQuery } from '@apollo/client';
+import BigNumber from 'bignumber.js';
+
+const FLOW_QUERY_OUTGOING = gql`
+  query ($id: ID!, $flowid: ID!) {
+    account(id: $id) {
+      outflows(where: {id: $flowid}) {
+        currentFlowRate
+        updatedAtTimestamp
+        streamedUntilUpdatedAt
+      }
+    }
+  }
+`;
+
+const FLOW_QUERY_INCOMING = gql`
+  query ($id: ID!, $flowid: ID!) {
+    account(id: $id) {
+      inflows(where: {id: $flowid}) {
+        currentFlowRate
+        updatedAtTimestamp
+        streamedUntilUpdatedAt
+      }
+    }
+  }
+`;
+
+function useRender() {
+  const [render, setRender] = useState(false);
+  return () => setRender(render => !render)
+}
 
 const SingleStream = ({route, connectionprop}) => {
   const [deleting, isDeleting] = useState(false);
   const [stylestate, setStylestate] = useState('outline');
+  const [currentraterender, setCurrentraterender] = useState(BigInt(0));
 
   const { address, isDisconnected } = useAccount();
   
@@ -80,11 +112,30 @@ const SingleStream = ({route, connectionprop}) => {
     : { color: isDarkMode ? Colors.darker : 'white', fontSize: 17, fontFamily: 'Inter', fontWeight: '700' }
 
 
-  var ratecusdx = (Number(route.params.rate) / 1000000000000000000) * 3600
-
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   let starteddate = new Date(route.params.started * 1000)
   var startdisplay = starteddate.getUTCDate()+"-"+months[starteddate.getUTCMonth()]+"-"+starteddate.getUTCFullYear()+" "+starteddate.toISOString().split('T')[1].split('.')[0]+" UTC"
+
+  const rerender = useRender();
+  //--------
+  const queryflow = useQuery(
+    route.params.type === 'outgoing' ? FLOW_QUERY_OUTGOING : FLOW_QUERY_INCOMING,
+    { 
+      variables: { id: address == undefined ? "" : address.toLowerCase(), flowid: route.params.flowid },
+      pollInterval: 500
+    }
+  );
+  if (queryflow.error) {return;}
+  if (queryflow.loading) {return;}
+  if (queryflow.data.account != null) {
+    if (route.params.type === 'incoming') {
+      if (queryflow.data.account.inflows[0].currentFlowRate != currentraterender) {
+        setCurrentraterender(queryflow.data.account.inflows[0].currentFlowRate);
+        rerender;
+      }
+    }
+  }
+  //--------
 
   return (
     <View style={{ flex: 1 }}>
@@ -103,15 +154,50 @@ const SingleStream = ({route, connectionprop}) => {
         </View>
         <View style={{flexDirection: 'row'}}>
           <View style={{ width: width0, alignItems: 'flex-end', justifyContent: 'center'}}><Text style={{color: isDarkMode ? Colors.white : "#686C80", fontFamily: 'Rubik', fontSize: 15}}>Current Rate:</Text></View>
-          <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center'}}><Text style={{color: isDarkMode ? Colors.white : "#686C80", fontFamily: 'Rubik', marginLeft: 12, fontSize: 15}}>{ratecusdx} cUSDx/hr</Text></View>
+          <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center'}}>
+            {
+              queryflow.data.account == null ?
+                (<></>)
+              : 
+                (
+                  <Text style={{color: isDarkMode ? Colors.white : "#686C80", fontFamily: 'Rubik', marginLeft: 12, fontSize: 15}}>
+                    {String(
+                      route.params.type === 'outgoing' ?
+                        ((BigNumber(queryflow.data.account.outflows[0].currentFlowRate).dividedBy(BigNumber('1000000000000000000'))).times(BigNumber('3600')))
+                      : ((BigNumber(queryflow.data.account.inflows[0].currentFlowRate).dividedBy(BigNumber('1000000000000000000'))).times(BigNumber('3600')))
+                    )} cUSDx/hr
+                  </Text>
+                )
+            }
+          </View>
         </View>
         <View style={{flexDirection: 'row'}}>
           <View style={{ width: width0, alignItems: 'flex-end' }}><Text style={{color: isDarkMode ? Colors.white : "#686C80", fontFamily: 'Rubik', fontSize: 15}}>Streamed:</Text></View>
-          
-          {route.params.type === 'incoming' ?
-          <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center' }}><FlowingBalance startingBalance={BigInt(route.params.streameduntilupdatedat)} startingBalanceDate={new Date(route.params.updatedattimestamp * 1000)} flowRate={BigInt(route.params.rate)}/></View>
-          :
-          <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center' }}><BalanceTemp rate={route.params.rate} updatedattimestamp={route.params.updatedattimestamp} streameduntilupdatedat={route.params.streameduntilupdatedat}/></View>}
+          {
+            queryflow.data.account != null ?
+              (
+                route.params.type === 'incoming' ?
+                  <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center' }}>
+                    {/* <FlowingBalance
+                      startingBalance={BigInt(route.params.streameduntilupdatedat)}
+                      startingBalanceDate={new Date(route.params.updatedattimestamp * 1000)}
+                      flowRate={BigInt(route.params.rate)}/> */}
+                    <BalanceTemp
+                      rate={queryflow.data.account.inflows[0].currentFlowRate}
+                      updatedattimestamp={queryflow.data.account.inflows[0].updatedAtTimestamp}
+                      streameduntilupdatedat={queryflow.data.account.inflows[0].streamedUntilUpdatedAt}/>
+                  </View>
+                :
+                  <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center' }}>
+                    <BalanceTemp
+                      rate={queryflow.data.account.outflows[0].currentFlowRate}
+                      updatedattimestamp={queryflow.data.account.outflows[0].updatedAtTimestamp}
+                      streameduntilupdatedat={queryflow.data.account.outflows[0].streamedUntilUpdatedAt}/>
+                  </View>
+              )
+            :
+              (<></>)
+          }
         </View>
       </View>
       <View style={{ alignItems: 'center', justifyContent: 'flex-start', flex: 0.4 }}>
