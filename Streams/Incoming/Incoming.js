@@ -6,6 +6,7 @@ import { useQuery, gql } from '@apollo/client';
 import '@walletconnect/react-native-compat'
 import { useAccount } from 'wagmi'
 import AmountStreamedTemp from '../AmountStreamedTemp';
+import Elapsed from '../Elapsed';
 
 const QUERY = gql`
   query ($id: ID!, $idt: ID!) {
@@ -106,9 +107,6 @@ export default function Incoming() {
               }
               renderItem={({inflow, index}) => {
                 let namedisplay = data.account.inflows[index].sender.id.startsWith("0x") ? data.account.inflows[index].sender.id.substring(0, 6)+"..."+data.account.inflows[index].sender.id.substring(38) : data.account.inflows[index].sender.id;
-                let elapsed = ((new Date().getTime()/1000) - data.account.inflows[index].createdAtTimestamp)/3600;
-                let difftime = (new Date().getTime()/1000) - data.account.inflows[index].updatedAtTimestamp;
-                let numstreamed = ((Number(data.account.inflows[index].currentFlowRate) * difftime) / 1000000000000000000) + (Number(data.account.inflows[index].streamedUntilUpdatedAt) / 1000000000000000000)
                 return(
                   <TouchableOpacity
                     style={{
@@ -136,10 +134,8 @@ export default function Incoming() {
                       </View>
                     </View>
                     <View style={{flex: 1.3, flexDirection: 'column'}}>
-                      <Text style={{color: isDarkMode ? Colors.white : "#686C80", fontSize: 18, fontFamily: 'Rubik', fontWeight: '400', lineHeight: 26}}>{namedisplay}</Text>
-                      <View style={{flexDirection: 'row'}}>
-                        <Text style={{color: '#15D828', fontSize: 14, lineHeight: 18}}>{elapsed.toString().length > 5 ? elapsed.toString().substring(0, 5)+"..." : elapsed} hr(s)</Text>
-                      </View>
+                      <Text style={{color: isDarkMode ? Colors.white : "#686C80", fontSize: 18, lineHeight: 26}}>{namedisplay}</Text>
+                      <Elapsed started={data.account.inflows[index].createdAtTimestamp} inlistview={true}/>
                     </View>
                     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                       <AmountStreamedTemp

@@ -150,7 +150,9 @@ const SingleStream = ({route, connectionprop}) => {
         </View>
         <View style={{flexDirection: 'row'}}>
           <View style={{ width: width0, alignItems: 'flex-end', justifyContent: 'center'}}><Text style={{color: isDarkMode ? Colors.white : "#686C80", fontFamily: 'Rubik', fontSize: 15}}>Elapsed:</Text></View>
-          <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center'}}><Elapsed started={route.params.started}/></View>
+          <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center'}}>
+            <Elapsed started={route.params.started} inlistview={false}/>
+          </View>
         </View>
         <View style={{flexDirection: 'row'}}>
           <View style={{ width: width0, alignItems: 'flex-end', justifyContent: 'center'}}><Text style={{color: isDarkMode ? Colors.white : "#686C80", fontFamily: 'Rubik', fontSize: 15}}>Current Rate:</Text></View>

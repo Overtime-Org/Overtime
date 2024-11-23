@@ -19,7 +19,7 @@ function useInterval(callback, delay) {
   }, [delay]);
 }
 
-export default function Elapsed({started}) {
+export default function Elapsed({started, inlistview}) {
 
   const[difftime, setDifftime] = useState((new Date().getTime()/1000) - started)
 
@@ -27,11 +27,20 @@ export default function Elapsed({started}) {
   var minute = Math.trunc(((((difftime)/3600/24 - Math.trunc((difftime)/3600/24)) * 24) - hour) * 60)
   var sec = Math.trunc(((((((difftime)/3600/24 - Math.trunc((difftime)/3600/24)) * 24) - hour) * 60) - minute) * 60);
   var day = Math.trunc((difftime)/3600/24);
-  var elapsed = day+" day(s) "+hour+" hr(s) "+minute+" min(s) "+sec+" sec(s)"
+  var elapsed = day+" d "+hour+" h "+minute+" min "+sec+" s"
 
   useInterval(() => setDifftime((new Date().getTime()/1000) - started), 1000)
 
   return(
-    <Text style={{color: "#15D828" , fontFamily: 'Rubik', marginLeft: 12, fontSize: 15}}>{elapsed}</Text>
+    <>
+    {
+      inlistview == true ?
+        <Text style={{color: '#15D828', fontSize: 14, lineHeight: 18}}>
+          {elapsed}
+        </Text>
+      :
+        <Text style={{color: "#15D828" , marginLeft: 12, fontSize: 15}}>{elapsed}</Text>
+    }
+    </>
   )
 };
