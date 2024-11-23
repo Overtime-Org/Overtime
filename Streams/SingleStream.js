@@ -8,7 +8,7 @@ import { useAccount, useWriteContract } from 'wagmi'
 import {celo} from 'viem/chains'
 import FlowingBalance from './FlowingBalance';
 import Elapsed from './Elapsed';
-import BalanceTemp from './BalanceTemp';
+import AmountStreamedTemp from './AmountStreamedTemp';
 import CFAv1Forwarder from '../abis/cfav1forwarder.abi.json';
 import { gql, useQuery } from '@apollo/client';
 import BigNumber from 'bignumber.js';
@@ -173,31 +173,33 @@ const SingleStream = ({route, connectionprop}) => {
         </View>
         <View style={{flexDirection: 'row'}}>
           <View style={{ width: width0, alignItems: 'flex-end' }}><Text style={{color: isDarkMode ? Colors.white : "#686C80", fontFamily: 'Rubik', fontSize: 15}}>Streamed:</Text></View>
+          <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center' }}>
           {
             queryflow.data.account != null ?
               (
                 route.params.type === 'incoming' ?
-                  <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center' }}>
+                  <>
                     {/* <FlowingBalance
                       startingBalance={BigInt(route.params.streameduntilupdatedat)}
                       startingBalanceDate={new Date(route.params.updatedattimestamp * 1000)}
                       flowRate={BigInt(route.params.rate)}/> */}
-                    <BalanceTemp
+                    <AmountStreamedTemp
                       rate={queryflow.data.account.inflows[0].currentFlowRate}
                       updatedattimestamp={queryflow.data.account.inflows[0].updatedAtTimestamp}
-                      streameduntilupdatedat={queryflow.data.account.inflows[0].streamedUntilUpdatedAt}/>
-                  </View>
+                      streameduntilupdatedat={queryflow.data.account.inflows[0].streamedUntilUpdatedAt}
+                      inlistview={false}/>
+                  </>
                 :
-                  <View style={{ width: width1, alignItems: 'flex-start', justifyContent: 'center' }}>
-                    <BalanceTemp
-                      rate={queryflow.data.account.outflows[0].currentFlowRate}
-                      updatedattimestamp={queryflow.data.account.outflows[0].updatedAtTimestamp}
-                      streameduntilupdatedat={queryflow.data.account.outflows[0].streamedUntilUpdatedAt}/>
-                  </View>
+                  <AmountStreamedTemp
+                    rate={queryflow.data.account.outflows[0].currentFlowRate}
+                    updatedattimestamp={queryflow.data.account.outflows[0].updatedAtTimestamp}
+                    streameduntilupdatedat={queryflow.data.account.outflows[0].streamedUntilUpdatedAt}
+                    inlistview={false}/>
               )
             :
               (<></>)
           }
+          </View>
         </View>
       </View>
       <View style={{ alignItems: 'center', justifyContent: 'flex-start', flex: 0.4 }}>

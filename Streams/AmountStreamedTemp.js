@@ -19,7 +19,7 @@ function useInterval(callback, delay) {
   }, [delay]);
 }
 
-export default function BalanceTemp({rate, updatedattimestamp, streameduntilupdatedat}) {
+export default function AmountStreamedTemp({rate, updatedattimestamp, streameduntilupdatedat, inlistview}) {
 
   const[difftime, setDifftime] = useState((new Date().getTime()/1000) - updatedattimestamp)
 
@@ -28,6 +28,11 @@ export default function BalanceTemp({rate, updatedattimestamp, streameduntilupda
   let numstreamed = ((Number(rate) * difftime) / 1000000000000000000) + (Number(streameduntilupdatedat) / 1000000000000000000)
 
   return(
-    <Text style={{color: "#15D828" , fontFamily: 'Rubik', marginLeft: 12, fontSize: 15}}>{numstreamed} cUSDx</Text>
+    <>
+    {inlistview == true ?
+      <Text style={{color: '#15D828', fontSize: 15}}>{numstreamed.toString().length > 5 ? numstreamed.toString().substring(0, 5)+"..." : numstreamed}</Text>
+    :
+      <Text style={{color: "#15D828" , fontFamily: 'Rubik', marginLeft: 12, fontSize: 15}}>{numstreamed} cUSDx</Text>}
+    </>
   )
 };

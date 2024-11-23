@@ -5,6 +5,7 @@ import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { useQuery, gql } from '@apollo/client';
 import '@walletconnect/react-native-compat'
 import { useAccount } from 'wagmi'
+import AmountStreamedTemp from '../AmountStreamedTemp';
 
 const QUERY = gql`
   query ($id: ID!, $idt: ID!) {
@@ -53,86 +54,107 @@ export default function Incoming() {
 
   return (
     <>
-    {address == undefined ?
-      (<></>)
-    : 
-      (data.account == null ?
-        <FlatList
-          data={nostreamarr}
-          contentContainerStyle={{alignItems: 'center', justifyContent: 'center', flex: 1}}
-          refreshControl={
-            <RefreshControl
-              colors={["#15D828"]}
-              refreshing={refreshing}
-              onRefresh={() => setRefreshing(true)}/>
-          }
-          renderItem={({nostreamobj, index}) => {
-            return(
-              <View>
-                <Text style={{color: isDarkMode ? Colors.white : "#686C80", fontSize: 18, fontWeight: '400', lineHeight: 26}}>{nostreamarr[index].nostreammsg}</Text>
-              </View>
-            )
-          }}
+    {
+      data.account == null ?
+        (
+          <FlatList
+            data={nostreamarr}
+            contentContainerStyle={{alignItems: 'center', justifyContent: 'center', flex: 1}}
+            refreshControl={
+              <RefreshControl
+                colors={["#15D828"]}
+                refreshing={refreshing}
+                onRefresh={() => setRefreshing(true)}/>
+            }
+            renderItem={({nostreamobj, index}) => {
+              return(
+                <View>
+                  <Text style={{color: isDarkMode ? Colors.white : "#686C80", fontSize: 18, fontWeight: '400', lineHeight: 26}}>{nostreamarr[index].nostreammsg}</Text>
+                </View>
+              )
+            }}
           />
+        )
       :
-        <FlatList
-          data={data.account.inflows}
-          refreshControl={
-            <RefreshControl
-              colors={["#15D828"]}
-              refreshing={refreshing}
-              onRefresh={() => setRefreshing(true)}/>
-          }
-          renderItem={({inflow, index}) => {
-            let namedisplay = data.account.inflows[index].sender.id.startsWith("0x") ? data.account.inflows[index].sender.id.substring(0, 6)+"..."+data.account.inflows[index].sender.id.substring(38) : data.account.inflows[index].sender.id;
-            let elapsed = ((new Date().getTime()/1000) - data.account.inflows[index].createdAtTimestamp)/3600;
-            let difftime = (new Date().getTime()/1000) - data.account.inflows[index].updatedAtTimestamp;
-            let numstreamed = ((Number(data.account.inflows[index].currentFlowRate) * difftime) / 1000000000000000000) + (Number(data.account.inflows[index].streamedUntilUpdatedAt) / 1000000000000000000)
-            return(
-              <TouchableOpacity
-                style={{
-                    paddingVertical: 18,
-                    flexDirection: 'row',
-                    flex: 3,
-                    alignItems: 'center'
-                  }}
-                onPress={() => {
-                  navigation.navigate('SingleStream', {
-                    type: 'incoming',
-                    flowid: data.account.inflows[index].id,
-                    name: data.account.inflows[index].sender.id,
-                    elapsed: elapsed,
-                    streamed: numstreamed,
-                    rate: data.account.inflows[index].currentFlowRate,
-                    started: data.account.inflows[index].createdAtTimestamp,
-                    url: data.account.inflows[index].flowUpdatedEvents[0].transactionHash,
-                    streameduntilupdatedat: data.account.inflows[index].streamedUntilUpdatedAt,
-                    updatedattimestamp: data.account.inflows[index].updatedAtTimestamp
-                  })
-                }}
-                >
-                <View style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center' }}>
-                  <View style={{width: 48, height: 48, backgroundColor: '#E7E7E7', borderRadius: 32, justifyContent: 'center', alignItems: 'center'}}>
-                    <Text style={{color: '#989CB0', fontSize: 24, fontFamily: 'Rubik', fontWeight: '600'}}>{data.account.inflows[index].sender.id.charAt(0)}</Text>
+        (
+          data.account.inflows.length == 0 || data.account == null ?
+            <FlatList
+              data={nostreamarr}
+              contentContainerStyle={{alignItems: 'center', justifyContent: 'center', flex: 1}}
+              refreshControl={
+                <RefreshControl
+                  colors={["#15D828"]}
+                  refreshing={refreshing}
+                  onRefresh={() => setRefreshing(true)}/>
+              }
+              renderItem={({nostreamobj, index}) => {
+                return(
+                  <View>
+                    <Text style={{color: isDarkMode ? Colors.white : "#686C80", fontSize: 18, fontWeight: '400', lineHeight: 26}}>{nostreamarr[index].nostreammsg}</Text>
                   </View>
-                </View>
-                <View style={{flex: 1.3, flexDirection: 'column'}}>
-                  <Text style={{color: isDarkMode ? Colors.white : "#686C80", fontSize: 18, fontFamily: 'Rubik', fontWeight: '400', lineHeight: 26}}>{namedisplay}</Text>
-                  <View style={{flexDirection: 'row'}}>
-                    <Text style={{color: '#15D828', fontSize: 14, fontFamily: 'Rubik', fontWeight: '300', lineHeight: 18}}>{elapsed.toString().length > 5 ? elapsed.toString().substring(0, 5)+"..." : elapsed} hr(s)</Text>
-                  </View>
-                </View>
-                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                  <Text style={{color: '#15D828', fontSize: 15, fontFamily: 'Rubik', fontWeight: '500'}}>{numstreamed.toString().length > 5 ? numstreamed.toString().substring(0, 5)+"..." : numstreamed}</Text>
-                  <Text style={{color: isDarkMode ? Colors.white : "#686C80", fontSize: 15, fontFamily: 'Rubik', fontWeight: '500'}}>cUSDx</Text>
-                </View>
-              </TouchableOpacity>
-            )
-          }}
-          ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: '#ececec'}}></View>}
-          ListFooterComponent={() => <View style={{ height: 75}}/>}/>
-      )
-      
+                )
+              }}
+            />
+          :
+            <FlatList
+              data={data.account.inflows}
+              refreshControl={
+                <RefreshControl
+                  colors={["#15D828"]}
+                  refreshing={refreshing}
+                  onRefresh={() => setRefreshing(true)}/>
+              }
+              renderItem={({inflow, index}) => {
+                let namedisplay = data.account.inflows[index].sender.id.startsWith("0x") ? data.account.inflows[index].sender.id.substring(0, 6)+"..."+data.account.inflows[index].sender.id.substring(38) : data.account.inflows[index].sender.id;
+                let elapsed = ((new Date().getTime()/1000) - data.account.inflows[index].createdAtTimestamp)/3600;
+                let difftime = (new Date().getTime()/1000) - data.account.inflows[index].updatedAtTimestamp;
+                let numstreamed = ((Number(data.account.inflows[index].currentFlowRate) * difftime) / 1000000000000000000) + (Number(data.account.inflows[index].streamedUntilUpdatedAt) / 1000000000000000000)
+                return(
+                  <TouchableOpacity
+                    style={{
+                      paddingVertical: 18,
+                      flexDirection: 'row',
+                      flex: 3,
+                      alignItems: 'center'
+                    }}
+                    onPress={() => {
+                      navigation.navigate('SingleStream', {
+                        type: 'incoming',
+                        flowid: data.account.inflows[index].id,
+                        name: data.account.inflows[index].sender.id,
+                        rate: data.account.inflows[index].currentFlowRate,
+                        started: data.account.inflows[index].createdAtTimestamp,
+                        url: data.account.inflows[index].flowUpdatedEvents[0].transactionHash,
+                        streameduntilupdatedat: data.account.inflows[index].streamedUntilUpdatedAt,
+                        updatedattimestamp: data.account.inflows[index].updatedAtTimestamp
+                      })
+                    }}
+                    >
+                    <View style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center' }}>
+                      <View style={{width: 48, height: 48, backgroundColor: '#E7E7E7', borderRadius: 32, justifyContent: 'center', alignItems: 'center'}}>
+                        <Text style={{color: '#989CB0', fontSize: 24, fontFamily: 'Rubik', fontWeight: '600'}}>{data.account.inflows[index].sender.id.charAt(0)}</Text>
+                      </View>
+                    </View>
+                    <View style={{flex: 1.3, flexDirection: 'column'}}>
+                      <Text style={{color: isDarkMode ? Colors.white : "#686C80", fontSize: 18, fontFamily: 'Rubik', fontWeight: '400', lineHeight: 26}}>{namedisplay}</Text>
+                      <View style={{flexDirection: 'row'}}>
+                        <Text style={{color: '#15D828', fontSize: 14, lineHeight: 18}}>{elapsed.toString().length > 5 ? elapsed.toString().substring(0, 5)+"..." : elapsed} hr(s)</Text>
+                      </View>
+                    </View>
+                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                      <AmountStreamedTemp
+                        rate={data.account.inflows[index].currentFlowRate}
+                        updatedattimestamp={data.account.inflows[index].updatedAtTimestamp}
+                        streameduntilupdatedat={data.account.inflows[index].streamedUntilUpdatedAt}
+                        inlistview={true}/>
+                      <Text style={{color: isDarkMode ? Colors.white : "#686C80", fontSize: 15}}>cUSDx</Text>
+                    </View>
+                  </TouchableOpacity>
+                )
+              }}
+              ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: '#ececec'}}></View>}
+              ListFooterComponent={() => <View style={{ height: 75}}/>}/>
+        )
     }
     <TouchableOpacity 
       style={{
