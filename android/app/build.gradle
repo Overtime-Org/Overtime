@@ -88,8 +88,8 @@ android {
         applicationId 'ke.co.mungeian'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 24
-        versionName "1.2.4"
+        versionCode 26
+        versionName "1.2.5-989ecd9"
     }
     signingConfigs {
         debug {

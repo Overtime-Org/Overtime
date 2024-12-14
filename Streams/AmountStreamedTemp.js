@@ -24,7 +24,7 @@ export default function AmountStreamedTemp({rate, updatedattimestamp, streamedun
   const[difftime, setDifftime] = useState((new Date().getTime()/1000) - updatedattimestamp)
   const[dp, setDp] = useState(0);
 
-  useInterval(() => setDifftime((new Date().getTime()/1000) - updatedattimestamp), 225)
+  useInterval(() => setDifftime((new Date().getTime()/1000) - updatedattimestamp), 250)
 
   let numstreamed = ((Number(rate) * difftime) / 1000000000000000000) + (Number(streameduntilupdatedat) / 1000000000000000000)
   let numstreamedstr = String(numstreamed)
