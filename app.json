@@ -2,7 +2,7 @@
   "expo": {
     "name": "Overtime",
     "slug": "Overtime",
-    "version": "1.2.5-989ecd9",
+    "version": "1.2.6",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,7 +16,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "ke.co.mungeian",
+      "bundleIdentifier": "ke.co.mungeian.overtime",
       "infoPlist": {
         "LSApplicationQueriesSchemes": [
           "valora"
@@ -28,8 +28,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "ke.co.mungeian",
-      "versionCode": 26
+      "package": "ke.co.mungeian.overtime",
+      "versionCode": 27
     },
     "web": {
       "favicon": "./assets/favicon.png"

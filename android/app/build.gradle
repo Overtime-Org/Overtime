@@ -83,13 +83,13 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'ke.co.mungeian'
+    namespace 'ke.co.mungeian.overtime'
     defaultConfig {
-        applicationId 'ke.co.mungeian'
+        applicationId 'ke.co.mungeian.overtime'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 26
-        versionName "1.2.5-989ecd9"
+        versionCode 27
+        versionName "1.2.6"
     }
     signingConfigs {
         debug {
