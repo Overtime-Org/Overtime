@@ -2,7 +2,7 @@
   "expo": {
     "name": "Overtime",
     "slug": "Overtime",
-    "version": "1.2.6",
+    "version": "0.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -28,8 +28,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "ke.co.mungeian.overtime",
-      "versionCode": 27
+      "package": "ke.co.mungeian.overtime"
     },
     "web": {
       "favicon": "./assets/favicon.png"
