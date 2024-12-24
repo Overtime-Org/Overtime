@@ -322,11 +322,26 @@ const SingleStream = ({route, connectionprop}) => {
                 (<></>)
               : 
                 (
-                  <Text style={{color: isDarkMode ? Colors.white : "#686C80", fontFamily: 'Rubik', marginLeft: 12, fontSize: 15}}>
+                  <Text style={{color: isDarkMode ? Colors.white : "#686C80", marginLeft: 12, fontSize: 15}}>
                     {String(
                       route.params.type === 'outgoing' ?
-                        ((BigNumber(queryflow.data.account.outflows[0].currentFlowRate).dividedBy(BigNumber('1000000000000000000'))).times(BigNumber('3600')).toFixed(18, BigNumber.ROUND_FLOOR))
-                      : ((BigNumber(queryflow.data.account.inflows[0].currentFlowRate).dividedBy(BigNumber('1000000000000000000'))).times(BigNumber('3600')).toFixed(18, BigNumber.ROUND_FLOOR))
+                        (
+                          (BigNumber(queryflow.data.account.outflows[0].currentFlowRate).dividedBy(BigNumber('1000000000000000000'))).times(BigNumber('3600')).toFixed(
+                            (BigNumber(queryflow.data.account.outflows[0].currentFlowRate).dividedBy(BigNumber('1000000000000000000'))).times(BigNumber('3600')).decimalPlaces() < 18 ?
+                              (BigNumber(queryflow.data.account.outflows[0].currentFlowRate).dividedBy(BigNumber('1000000000000000000'))).times(BigNumber('3600')).decimalPlaces()
+                            : 18,
+                            BigNumber.ROUND_FLOOR
+                          )
+                        )
+                      :
+                        (
+                          (BigNumber(queryflow.data.account.inflows[0].currentFlowRate).dividedBy(BigNumber('1000000000000000000'))).times(BigNumber('3600')).toFixed(
+                            (BigNumber(queryflow.data.account.inflows[0].currentFlowRate).dividedBy(BigNumber('1000000000000000000'))).times(BigNumber('3600')).decimalPlaces() < 18 ?
+                              (BigNumber(queryflow.data.account.inflows[0].currentFlowRate).dividedBy(BigNumber('1000000000000000000'))).times(BigNumber('3600')).decimalPlaces()
+                            : 18,
+                            BigNumber.ROUND_FLOOR
+                          )
+                        )
                     )} cUSDx/hr
                   </Text>
                 )
