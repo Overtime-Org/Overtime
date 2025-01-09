@@ -177,6 +177,9 @@ const SingleStream = ({route, connectionprop}) => {
   const width4th = () => {
     return 0.45 * Dimensions.get('window').width;
   };
+  const width5th = () => {
+    return 0.95 * Dimensions.get('window').width;
+  };
   const height1st = () => {
     return route.params.type === 'outgoing' && modifying == true ? 
         (42 / 100) * Dimensions.get('window').height
@@ -194,11 +197,12 @@ const SingleStream = ({route, connectionprop}) => {
   const width1 = width2nd();
   const width2 = width3rd();
   const width3 = width4th();
+  const width4 = width5th();
   const height0 = height1st();
   const height1 = height2nd();
   
-  const buttonstyle = stylestate == 'outline' ? { marginTop: 50, width: 190, height: 40, borderColor: '#FA0514', borderWidth: 2, borderRadius: 10, alignItems: 'center', alignSelf: 'center', justifyContent: 'center' }
-    : { marginTop: 50, width: 190, height: 40, backgroundColor: '#FA0514', borderRadius: 10, alignItems: 'center', alignSelf: 'center', justifyContent: 'center' }
+  const buttonstyle = stylestate == 'outline' ? { marginTop: 50, width: width4, height: 40, borderColor: '#FA0514', borderWidth: 2, borderRadius: 15, alignItems: 'center', alignSelf: 'center', justifyContent: 'center' }
+    : { marginTop: 50, width: width4, height: 40, backgroundColor: '#FA0514', borderRadius: 15, alignItems: 'center', alignSelf: 'center', justifyContent: 'center' }
   const cancelstream = stylestate == 'outline' ? { color: '#FA0514', fontSize: 17, fontFamily: 'Inter', fontWeight: '700' }
     : { color: isDarkMode ? Colors.darker : 'white', fontSize: 17, fontFamily: 'Inter', fontWeight: '700' }
 
