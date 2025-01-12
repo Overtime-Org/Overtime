@@ -9,16 +9,17 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import '@walletconnect/react-native-compat'
 import { useAccount, useReadContract, useWriteContract } from 'wagmi'
 import {celo} from 'viem/chains'
-import Wrap from './Wrap'
+import Wrap from './Wrap';
+import Timeranges from './Timeranges';
 import SuperToken from '../abis/supertoken.abi.json';
 import CFAv1Forwarder from '../abis/cfav1forwarder.abi.json';
 import BigNumber from "bignumber.js";
 
-function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype, numUI}) {
+function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype, numUI, timerange, setshowlisttrue}) {
   const [isFocused, setIsFocused] = useState(false);
 
   const handleFocus = () => setIsFocused(true);
@@ -41,6 +42,8 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
     color: isDarkMode ? Colors.white : Colors.black,
     width: '100%'
   }
+
+  let timeranges = ['month', 'day', 'hour'];
   
   return (
     <View style={{flexDirection: 'row'}}>
@@ -58,7 +61,28 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
         />
       </View>
       {numUI == 1 ? <View style={{width: '10%'}}><Text style={{position: 'absolute', bottom: 0, fontSize: 20, alignSelf: 'center', color: isDarkMode ? Colors.light : Colors.black}}>/</Text></View> : <></>}
-      {numUI == 1 ? <View style={{width: '30%'}}><Text style={{position: 'absolute', bottom: 0, fontSize: 20, color: isDarkMode ? Colors.light : Colors.black}}>hour</Text></View> : <></>}
+      {
+        numUI == 1 ?
+          <TouchableOpacity style={{width: '30%'}} onPress={() => setshowlisttrue(true)}>
+            <View
+              style={{position: 'absolute', bottom: 0, flexDirection: 'row'}}>
+              <View style={{width: '79.16%'}}>
+                <View style={{position: 'absolute', bottom: 0}}>
+                  <Text style={{fontSize: 20, color: isDarkMode ? Colors.light : Colors.black}}>
+                    {timeranges[timerange]}
+                  </Text>
+                </View>
+              </View>
+              <View style={{width: '20.84%'}}>
+                <View style={{position: 'absolute', bottom: 0}}>
+                  <MaterialCommunityIcons name='chevron-down' size={20} style={{color: isDarkMode ? Colors.light : Colors.black}}/>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+        :
+          <></>
+      }
     </View>
   );
 }
@@ -68,11 +92,12 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
   const [rate, setRate] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [buffer, setBuffer] = useState(BigNumber(0));
+  const [minafterbuffe1r, setMinafterbuffe1r] = useState(BigNumber(0));
   const [details, setDetails] = useState(false)
+  const [showlist, setShowlist] = useState(false);
+  const [timerange, setTimerange] = useState(0);
 
-  const { address, isDisconnected } = useAccount()
-
-  let minafterbuffer = BigNumber(rate).times(24);
+  const { address, isDisconnected } = useAccount();
 
   function useInterval(callback, delay) {
     const savedCallback = useRef();
@@ -102,15 +127,28 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
 
   const { isSuccess, writeContract } = useWriteContract();
 
-  async function hourrate(rate){
-    var rateweips = (BigNumber(rate).times(BigNumber('1000000000000000000'))).dividedBy(3600)
-    return rateweips.toFormat(0, BigNumber.ROUND_CEIL, {groupSeparator: ''})
+  async function toratestr(rate, timerange){
+    var rateweips;
+    switch (timerange) {
+      case 0:
+        rateweips = (BigNumber(rate).times(BigNumber('1000000000000000000'))).dividedBy(2592000);
+        break;
+        
+      case 1:
+        rateweips = (BigNumber(rate).times(BigNumber('1000000000000000000'))).dividedBy(86400);
+        break;
+
+      case 2:
+        rateweips = (BigNumber(rate).times(BigNumber('1000000000000000000'))).dividedBy(3600);
+        break;
+    }
+    return rateweips.toFormat(0, BigNumber.ROUND_CEIL, {groupSeparator: ''});
   }
 
-  async function createflow(receiver, rate) {
+  async function createflow(receiver, rate, timerange) {
     try {
       if (isDisconnected == false) {
-        const ratestr = await hourrate(rate);
+        const ratestr = await toratestr(rate, timerange);
         writeContract({
           address: '0xcfA132E353cB4E398080B9700609bb008eceB125',
           abi: CFAv1Forwarder,
@@ -133,7 +171,44 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
     if (address == undefined) {
       connectionprop(true)
     }
-  }, [address])
+  }, [address]);
+
+  useEffect(() => {
+    switch (timerange) {
+      case 0:
+        if (rate.length > 0 && BigNumber(rate).isNaN() == false && BigNumber(rate).isFinite() == true) {
+          setBuffer(BigNumber(rate).dividedBy(180));
+          setMinafterbuffe1r(BigNumber(rate).dividedBy(30));
+        }
+        else if (rate.length == 0 || BigNumber(rate).isNaN() == true || BigNumber(rate).isFinite() == false) {
+          setBuffer(BigNumber(0));
+          setMinafterbuffe1r(BigNumber(0));
+        }
+        break;
+    
+      case 1:
+        if (rate.length > 0 && BigNumber(rate).isNaN() == false && BigNumber(rate).isFinite() == true) {
+          setBuffer(BigNumber(rate).dividedBy(6));
+          setMinafterbuffe1r(BigNumber(rate));
+        }
+        else if (rate.length == 0 || BigNumber(rate).isNaN() == true || BigNumber(rate).isFinite() == false) {
+          setBuffer(BigNumber(0));
+          setMinafterbuffe1r(BigNumber(0));
+        }
+        break;
+
+      case 2:
+        if (rate.length > 0 && BigNumber(rate).isNaN() == false && BigNumber(rate).isFinite() == true) {
+          setBuffer(BigNumber(rate).times(4));
+          setMinafterbuffe1r(BigNumber(rate).times(24));
+        }
+        else if (rate.length == 0 || BigNumber(rate).isNaN() == true || BigNumber(rate).isFinite() == false) {
+          setBuffer(BigNumber(0));
+          setMinafterbuffe1r(BigNumber(0));
+        }
+        break;
+    }
+  }, [timerange]);
 
   useEffect(() => {
     if (disabled == true) {
@@ -143,7 +218,7 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
 
   useEffect(() => {
     if (creatingstream == true) {
-      createflow(receiver, rate)
+      createflow(receiver, rate, timerange)
     }
   }, [creatingstream])
 
@@ -175,15 +250,43 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
 
   const receiverChange = (newText) => setReceiver(newText);
   const rateChange = (newText) => {
-    setRate(newText)
+    switch (timerange) {
+      case 0:
+        setRate(newText);
+        if (newText.length > 0 && BigNumber(newText).isNaN() == false && BigNumber(newText).isFinite() == true) {
+          setBuffer(BigNumber(newText).dividedBy(180));
+          setMinafterbuffe1r(BigNumber(newText).dividedBy(30));
+        }
+        else if (newText.length == 0 || BigNumber(newText).isNaN() == true || BigNumber(newText).isFinite() == false) {
+          setBuffer(BigNumber(0));
+          setMinafterbuffe1r(BigNumber(0));
+        }
+        break;
     
-    if (newText.length > 0 && BigNumber(newText).isNaN() == false && BigNumber(newText).isFinite() == true) {
-      setBuffer(BigNumber(newText).times(4))
-    }
-    else if (newText.length == 0 || BigNumber(newText).isNaN() == true || BigNumber(newText).isFinite() == false) {
-      setBuffer(BigNumber(0))
-    }
-    
+      case 1:
+        setRate(newText);
+        if (newText.length > 0 && BigNumber(newText).isNaN() == false && BigNumber(newText).isFinite() == true) {
+          setBuffer(BigNumber(newText).dividedBy(6));
+          setMinafterbuffe1r(BigNumber(newText));
+        }
+        else if (newText.length == 0 || BigNumber(newText).isNaN() == true || BigNumber(newText).isFinite() == false) {
+          setBuffer(BigNumber(0));
+          setMinafterbuffe1r(BigNumber(0));
+        }
+        break;
+
+      case 2:
+        setRate(newText);
+        if (newText.length > 0 && BigNumber(newText).isNaN() == false && BigNumber(newText).isFinite() == true) {
+          setBuffer(BigNumber(newText).times(4));
+          setMinafterbuffe1r(BigNumber(newText).times(24));
+        }
+        else if (newText.length == 0 || BigNumber(newText).isNaN() == true || BigNumber(newText).isFinite() == false) {
+          setBuffer(BigNumber(0));
+          setMinafterbuffe1r(BigNumber(0));
+        }
+        break;
+    }    
   };
 
   const isDarkMode = useColorScheme() === 'dark';
@@ -205,8 +308,11 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
         margintop={50}
         keyboardtype="numeric"
         numUI={1}
+        timerange={timerange}
+        setshowlisttrue={setShowlist}
       />
       <Wrap modalVisible={modalVisible} setModalVisible={setModalVisible}/>
+      <Timeranges showlist={showlist} setshowlistfalse={setShowlist} settimerange={setTimerange}/>
       {details == true ?
         <View style={{flexDirection: 'row', marginTop: 35, width: '100%', paddingHorizontal: 10, alignItems: 'flex-start', justifyContent: 'flex-start'}}>
           <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Upfront Buffer: {String(buffer)} cUSDx</Text>
@@ -216,14 +322,14 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
       }
       {details == true ?
         <View style={{flexDirection: 'row', marginTop: 15, width: '100%', paddingHorizontal: 10, alignItems: 'flex-start', justifyContent: 'flex-start'}}>
-          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Minimum after Buffer: {minafterbuffer.isNaN() ? 0 : String(minafterbuffer)} cUSDx</Text>
+          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Minimum after Buffer: {String(minafterbuffe1r)} cUSDx</Text>
         </View>
       :
         <></>
       }
       <View style={{flexDirection: 'row', marginTop: details == true ? 15 : 35, width: '100%'}}>
         <View style={{width: '60%', marginLeft: 10, alignItems: 'flex-start', justifyContent: 'flex-start'}}>
-          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Total Required: {rate.length > 0 && BigNumber(rate).isNaN() == false ? String(buffer.plus(minafterbuffer)) : 0} cUSDx</Text>
+          <Text style={{color: isDarkMode ? Colors.white : Colors.black}}>Total Required: {rate.length > 0 && BigNumber(rate).isNaN() == false ? String(buffer.plus(minafterbuffe1r)) : 0} cUSDx</Text>
         </View>
         <View style={{width: '40%', alignItems: 'center', justifyContent: 'center'}}>
           <TouchableOpacity
@@ -253,7 +359,10 @@ export default function CreateStream({connectionprop, setdisabled, disabled, set
         onPress={() => {
           let regex = new RegExp(/^0x[a-fA-F0-9]{40}$/);
           if (regex.test(receiver) == true && rate.length > 0 && BigNumber(rate).isNaN() == false && BigNumber(rate).isFinite() == true) {
-            if (buffer.plus(minafterbuffer).lt(BigNumber(queryresult.data).dividedBy(BigNumber('1000000000000000000')))) {
+            if (
+              (BigNumber(queryresult.data).dividedBy(BigNumber('1000000000000000000'))).gt(BigNumber('0.0000000000001008')) &&
+              buffer.plus(minafterbuffe1r).lt(BigNumber(queryresult.data).dividedBy(BigNumber('1000000000000000000')))
+            ) {
               setdisabled(true)
             }
           }
