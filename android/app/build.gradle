@@ -109,9 +109,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'ke.co.mungeian.overtime'
+    namespace 'celo.ianmunge.overtime'
     defaultConfig {
-        applicationId 'ke.co.mungeian.overtime'
+        applicationId 'celo.ianmunge.overtime'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -16,7 +16,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "ke.co.mungeian.overtime",
+      "bundleIdentifier": "celo.ianmunge.overtime",
       "infoPlist": {
         "LSApplicationQueriesSchemes": [
           "valora"
@@ -28,7 +28,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "ke.co.mungeian.overtime"
+      "package": "celo.ianmunge.overtime"
     },
     "web": {
       "favicon": "./assets/favicon.png"

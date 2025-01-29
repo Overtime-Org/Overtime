@@ -1,4 +1,4 @@
-package ke.co.mungeian.overtime
+package celo.ianmunge.overtime
 
 import android.app.Application
 import android.content.res.Configuration
