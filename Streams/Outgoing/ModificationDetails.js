@@ -81,7 +81,7 @@ const ModificationDetails = ({modalVisible, setModalVisiblefalse, newrate}) => {
             <View style={{marginHorizontal: 25, marginTop: 5, flexDirection: 'row'}}>
               <View style={{width: '10%', alignItems: 'center', justifyContent: 'center'}}>
                 <Image
-                  source={isDarkMode ? require("./../assets/circle-solid-white.png") : require("./../assets/circle-solid.png")}
+                  source={isDarkMode ? require("../../assets/circle-solid-white.png") : require("../../assets/circle-solid.png")}
                   style={{
                     resizeMode: 'center',
                     width: 8,
@@ -97,7 +97,7 @@ const ModificationDetails = ({modalVisible, setModalVisiblefalse, newrate}) => {
             <View style={{marginHorizontal: 25, marginTop: 5, flexDirection: 'row'}}>
               <View style={{width: '10%', alignItems: 'center', justifyContent: 'center'}}>
                 <Image
-                  source={isDarkMode ? require("./../assets/circle-solid-white.png") : require("./../assets/circle-solid.png")}
+                  source={isDarkMode ? require("../../assets/circle-solid-white.png") : require("../../assets/circle-solid.png")}
                   style={{
                     resizeMode: 'center',
                     width: 8,
@@ -113,7 +113,7 @@ const ModificationDetails = ({modalVisible, setModalVisiblefalse, newrate}) => {
             <View style={{marginHorizontal: 25, marginTop: 5, flexDirection: 'row'}}>
               <View style={{width: '10%', alignItems: 'center', justifyContent: 'center'}}>
                 <Image
-                  source={isDarkMode ? require("./../assets/circle-solid-white.png") : require("./../assets/circle-solid.png")}
+                  source={isDarkMode ? require("../../assets/circle-solid-white.png") : require("../../assets/circle-solid.png")}
                   style={{
                     resizeMode: 'center',
                     width: 8,

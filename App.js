@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import ConnectWallet from './ConnectWallet';
 import Streams from './Streams';
 import SingleStream from './Streams/SingleStream';
-import CreateStream from './CreateStream/CreateStream'
+import CreateStream from './Streams/Outgoing/CreateStream/CreateStream';
 import Unwrap from './Streams/Incoming/Unwrap';
 import '@walletconnect/react-native-compat'
 import { WagmiProvider } from 'wagmi'
@@ -27,7 +27,7 @@ const projectId = process.env['PROJECT_ID'];
 const metadata = {
 	name: PROJECT_NAME,
 	description: PROJECT_DESCRIPTION,
-	url: 'https://ianmunge0.github.io/overtime-demo'
+	url: 'https://6814d19d953fb61cd3a6abc9--overtimedapp.netlify.app'
 };
 
 const chains = [celo]

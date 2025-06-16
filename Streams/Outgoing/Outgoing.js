@@ -12,8 +12,8 @@ import { AntDesign } from '@expo/vector-icons';
 import '@walletconnect/react-native-compat'
 import { useAccount } from 'wagmi'
 import { useQuery, gql } from '@apollo/client';
-import AmountStreamedTemp from './AmountStreamedTemp';
-import Elapsed from './Elapsed';
+import AmountStreamedTemp from '../AmountStreamedTemp';
+import Elapsed from '../Elapsed';
 
 const QUERY = gql`
   query ($id: ID!, $idt: ID!) {

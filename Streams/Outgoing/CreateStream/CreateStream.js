@@ -15,8 +15,8 @@ import { useAccount, useReadContract, useWriteContract } from 'wagmi'
 import {celo} from 'viem/chains'
 import Wrap from './Wrap';
 import Timeranges from './Timeranges';
-import SuperToken from '../abis/supertoken.abi.json';
-import CFAv1Forwarder from '../abis/cfav1forwarder.abi.json';
+import SuperToken from '../../../abis/supertoken.abi.json';
+import CFAv1Forwarder from '../../../abis/cfav1forwarder.abi.json';
 import BigNumber from "bignumber.js";
 
 function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype, numUI, timerange, setshowlisttrue}) {

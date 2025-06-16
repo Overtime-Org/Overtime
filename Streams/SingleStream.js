@@ -10,7 +10,7 @@ import {celo} from 'viem/chains'
 import FlowingBalance from './FlowingBalance';
 import Elapsed from './Elapsed';
 import AmountStreamedTemp from './AmountStreamedTemp';
-import ModificationDetails from './ModificationDetails';
+import ModificationDetails from './Outgoing/ModificationDetails';
 import CFAv1Forwarder from '../abis/cfav1forwarder.abi.json';
 import { gql, useQuery } from '@apollo/client';
 import BigNumber from 'bignumber.js';

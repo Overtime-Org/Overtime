@@ -13,8 +13,8 @@ import { AntDesign } from '@expo/vector-icons';
 import '@walletconnect/react-native-compat'
 import { useAccount, useWriteContract, useReadContract } from 'wagmi'
 import {celo} from 'viem/chains'
-import StableTokenV2 from '../abis/stabletokenv2.abi.json'
-import SuperToken from '../abis/supertoken.abi.json';
+import StableTokenV2 from '../../../abis/stabletokenv2.abi.json';
+import SuperToken from '../../../abis/supertoken.abi.json';
 
 const Wrap = ({modalVisible, setModalVisible}) => {
   const [isFocused, setIsFocused] = useState(false);
