@@ -54,7 +54,7 @@ function ModifyStream({label, value, onchangetext, setismodifyingfalse, setnewra
 
   const fli = {
     paddingTop: 18,
-    borderBottomColor: isFocused ? "#15D828" : (isDarkMode ? Colors.light : Colors.dark),
+    borderBottomColor: isFocused ? "#15D828" : (isDarkMode ? Colors.light : "#989CB0"),
     borderBottomWidth: 1,
     flexDirection: 'row',
     width: '50%'

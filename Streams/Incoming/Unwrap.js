@@ -34,7 +34,7 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
 
   const isDarkMode = useColorScheme() === 'dark';
 
-  const fli = { paddingTop: 18, marginTop: margintop, borderBottomColor: isFocused ? "#15D828" : (isDarkMode ? Colors.light : Colors.dark), borderBottomWidth: 1, flexDirection: 'row', width: '100%' }
+  const fli = { paddingTop: 18, marginTop: margintop, borderBottomColor: isFocused ? "#15D828" : (isDarkMode ? Colors.light : "#989CB0"), borderBottomWidth: 1, flexDirection: 'row', width: '100%' }
 
   const labelStyle = {
     position: 'absolute',
@@ -183,7 +183,7 @@ export default function Unwrap() {
       />
       <Text style={{color: isDarkMode ? Colors.white : Colors.black, marginTop: 20}}>{querybalance.isFetched ? String(BigNumber(querybalance.data).dividedBy(BigNumber('1000000000000000000'))) : "--"} cUSDx</Text>
       <View style={{flexDirection: 'row'}}>
-        <Text style={{color: isDarkMode ? Colors.white : Colors.black, marginTop: 3}}>Net Flow Rate: </Text>
+        <Text style={{color: isDarkMode ? Colors.white : Colors.black, marginTop: 3}}>Net Flow: </Text>
         {
           querybalance.isFetched && BigNumber(querybalance.data).eq(BigNumber(0)) ?
             (<Text style={{color: isDarkMode ? Colors.white : Colors.black, marginTop: 3}}>Zero</Text>)

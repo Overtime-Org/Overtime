@@ -27,7 +27,7 @@ function FloatingLabelInput({label, value, onchangetext, margintop, keyboardtype
 
   const isDarkMode = useColorScheme() === 'dark';
 
-  const fli = { paddingTop: 18, marginTop: margintop, borderBottomColor: isFocused ? "#15D828" : (isDarkMode ? Colors.light : Colors.dark), borderBottomWidth: 1, flexDirection: 'row', width: numUI == 1 ? '60%' : '100%' }
+  const fli = { paddingTop: 18, marginTop: margintop, borderBottomColor: isFocused ? "#15D828" : (isDarkMode ? Colors.light : "#989CB0"), borderBottomWidth: 1, flexDirection: 'row', width: numUI == 1 ? '60%' : '100%' }
 
   const labelStyle = {
     position: 'absolute',

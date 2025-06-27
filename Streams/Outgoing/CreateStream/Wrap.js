@@ -98,7 +98,7 @@ const Wrap = ({modalVisible, setModalVisible}) => {
     shadowRadius: 4,
     elevation: 5
   }
-  const fli = { paddingTop: 18, marginTop: 10, borderBottomColor: isFocused ? "#15D828" : (isDarkMode ? Colors.light : Colors.dark), borderBottomWidth: 1, width: '100%' }
+  const fli = { paddingTop: 18, marginTop: 10, borderBottomColor: isFocused ? "#15D828" : (isDarkMode ? Colors.light : "#989CB0"), borderBottomWidth: 1, width: '100%' }
   const labelStyle = {
     position: 'absolute',
     left: 0,
