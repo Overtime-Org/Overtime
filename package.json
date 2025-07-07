@@ -1,6 +1,6 @@
 {
   "name": "overtime",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
@@ -24,6 +24,7 @@
     "apollo-boost": "^0.4.9",
     "bignumber.js": "^9.1.2",
     "expo": "~51.0.28",
+    "expo-camera": "~15.0.16",
     "expo-splash-screen": "~0.27.5",
     "expo-status-bar": "~1.12.1",
     "graphql": "^15.9.0",

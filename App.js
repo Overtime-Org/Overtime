@@ -7,6 +7,7 @@ import Streams from './Streams';
 import SingleStream from './Streams/SingleStream';
 import CreateStream from './Streams/Outgoing/CreateStream/CreateStream';
 import Unwrap from './Streams/Incoming/Unwrap';
+import Back from './Streams/Outgoing/CreateStream/Back';
 import '@walletconnect/react-native-compat'
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -57,6 +58,7 @@ function App() {
   const [disabled, setDisabled] = useState(false);
   const [creatingstream, setCreatingstream] = useState(false)
   const [refreshoutgoing, setRefreshoutgoing] = useState(false)
+  const [qrview, setQrview] = useState(false);
   const connectionprop = (isDisconnected_) => {
     isDisconnected(isDisconnected_);
   }
@@ -128,15 +130,42 @@ function App() {
                     name="CreateStream"
                     options={{
                       headerStyle: {backgroundColor: isDarkMode ? Colors.darker : Colors.lighter},
-                      headerBackImage: () => <Ionicons name="arrow-back" style={{color: isDarkMode ? Colors.white : Colors.black}} size={24} />,
+                      headerTransparent: qrview,
+                      headerLeft: () => {
+                        return qrview == true ?
+                          <Ionicons
+                            name="arrow-back"
+                            style={{marginLeft: 11, color: isDarkMode ? Colors.white : Colors.black}}
+                            size={24}
+                            onPress={() => setQrview(false)}/>
+                        :
+                          <Back/>
+                      },
                       headerTitle: "",
-                      headerRight: () =>
-                        <MaterialCommunityIcons
-                          name="account"
-                          style={{paddingVertical: 10, paddingHorizontal: 15, color: isDarkMode ? Colors.white : Colors.black}}
-                          onPress={() => open()}
-                          size={24}/>}}>
-                    {() => {return <CreateStream connectionprop={connectionprop} setdisabled={setDisabled} disabled={disabled} setrefreshoutgoing={setRefreshoutgoing} setcreatingstream={setCreatingstream} creatingstream={creatingstream}/>}}
+                      headerRight: () => {
+                        return qrview == true ?
+                          <></>
+                        :
+                          <MaterialCommunityIcons
+                            name="account"
+                            style={{paddingVertical: 10, paddingHorizontal: 15, color: isDarkMode ? Colors.white : Colors.black}}
+                            onPress={() => open()}
+                            size={24}/>
+                      }
+                    }}>
+                    {() => {
+                      return(
+                        <CreateStream
+                          connectionprop={connectionprop}
+                          setdisabled={setDisabled}
+                          disabled={disabled}
+                          setrefreshoutgoing={setRefreshoutgoing}
+                          setcreatingstream={setCreatingstream}
+                          creatingstream={creatingstream}
+                          qrview={qrview}
+                          setqrview={setQrview}/>
+                      )
+                    }}
                   </Stack.Screen>
                   <Stack.Screen
                     name="Unwrap"
