@@ -212,7 +212,7 @@ export default function CreateStream({
   const [rate, setRate] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [buffer, setBuffer] = useState(BigNumber(0));
-  const [minafterbuffe1r, setMinafterbuffe1r] = useState(BigNumber(0));
+  const [minafterbuffe1r, setMinafterbuffer] = useState(BigNumber(0));
   const [details, setDetails] = useState(false)
   const [showlist, setShowlist] = useState(false);
   const [timerange, setTimerange] = useState(0);
@@ -249,7 +249,7 @@ export default function CreateStream({
     chainId: celo.id
   });
 
-  const { isSuccess, writeContract } = useWriteContract();
+  const { isSuccess, isError, writeContract } = useWriteContract();
 
   async function toratestr(rate, timerange){
     var rateweips;
@@ -302,33 +302,33 @@ export default function CreateStream({
       case 0:
         if (rate.length > 0 && BigNumber(rate).isNaN() == false && BigNumber(rate).isFinite() == true) {
           setBuffer(BigNumber(rate).dividedBy(180));
-          setMinafterbuffe1r(BigNumber(rate).dividedBy(30));
+          setMinafterbuffer(BigNumber(rate).dividedBy(30));
         }
         else if (rate.length == 0 || BigNumber(rate).isNaN() == true || BigNumber(rate).isFinite() == false) {
           setBuffer(BigNumber(0));
-          setMinafterbuffe1r(BigNumber(0));
+          setMinafterbuffer(BigNumber(0));
         }
         break;
     
       case 1:
         if (rate.length > 0 && BigNumber(rate).isNaN() == false && BigNumber(rate).isFinite() == true) {
           setBuffer(BigNumber(rate).dividedBy(6));
-          setMinafterbuffe1r(BigNumber(rate));
+          setMinafterbuffer(BigNumber(rate));
         }
         else if (rate.length == 0 || BigNumber(rate).isNaN() == true || BigNumber(rate).isFinite() == false) {
           setBuffer(BigNumber(0));
-          setMinafterbuffe1r(BigNumber(0));
+          setMinafterbuffer(BigNumber(0));
         }
         break;
 
       case 2:
         if (rate.length > 0 && BigNumber(rate).isNaN() == false && BigNumber(rate).isFinite() == true) {
           setBuffer(BigNumber(rate).times(4));
-          setMinafterbuffe1r(BigNumber(rate).times(24));
+          setMinafterbuffer(BigNumber(rate).times(24));
         }
         else if (rate.length == 0 || BigNumber(rate).isNaN() == true || BigNumber(rate).isFinite() == false) {
           setBuffer(BigNumber(0));
-          setMinafterbuffe1r(BigNumber(0));
+          setMinafterbuffer(BigNumber(0));
         }
         break;
     }
@@ -366,6 +366,7 @@ export default function CreateStream({
 
   useEffect(() => {
     if (resetreceiver == false && receiver == '' && rate == '' && buffer.eq(BigNumber(0)) && creatingstream == true) {
+      setMinafterbuffer(BigNumber(0));
       setcreatingstream(false)
     }
   }, [rate])
@@ -388,8 +389,13 @@ export default function CreateStream({
   }, [buffer]);
 
   useEffect(() => {
-    setBuffer(BigNumber(0))
-  }, [isSuccess]);
+    if (isSuccess) {
+      setBuffer(BigNumber(0));
+    }
+    else if (isError) {
+      setcreatingstream(false);
+    }
+  }, [isSuccess, isError]);
 
   useInterval(() => {
     queryresult.refetch();
@@ -402,11 +408,11 @@ export default function CreateStream({
         setRate(newText);
         if (newText.length > 0 && BigNumber(newText).isNaN() == false && BigNumber(newText).isFinite() == true) {
           setBuffer(BigNumber(newText).dividedBy(180));
-          setMinafterbuffe1r(BigNumber(newText).dividedBy(30));
+          setMinafterbuffer(BigNumber(newText).dividedBy(30));
         }
         else if (newText.length == 0 || BigNumber(newText).isNaN() == true || BigNumber(newText).isFinite() == false) {
           setBuffer(BigNumber(0));
-          setMinafterbuffe1r(BigNumber(0));
+          setMinafterbuffer(BigNumber(0));
         }
         break;
     
@@ -414,11 +420,11 @@ export default function CreateStream({
         setRate(newText);
         if (newText.length > 0 && BigNumber(newText).isNaN() == false && BigNumber(newText).isFinite() == true) {
           setBuffer(BigNumber(newText).dividedBy(6));
-          setMinafterbuffe1r(BigNumber(newText));
+          setMinafterbuffer(BigNumber(newText));
         }
         else if (newText.length == 0 || BigNumber(newText).isNaN() == true || BigNumber(newText).isFinite() == false) {
           setBuffer(BigNumber(0));
-          setMinafterbuffe1r(BigNumber(0));
+          setMinafterbuffer(BigNumber(0));
         }
         break;
 
@@ -426,11 +432,11 @@ export default function CreateStream({
         setRate(newText);
         if (newText.length > 0 && BigNumber(newText).isNaN() == false && BigNumber(newText).isFinite() == true) {
           setBuffer(BigNumber(newText).times(4));
-          setMinafterbuffe1r(BigNumber(newText).times(24));
+          setMinafterbuffer(BigNumber(newText).times(24));
         }
         else if (newText.length == 0 || BigNumber(newText).isNaN() == true || BigNumber(newText).isFinite() == false) {
           setBuffer(BigNumber(0));
-          setMinafterbuffe1r(BigNumber(0));
+          setMinafterbuffer(BigNumber(0));
         }
         break;
     }    

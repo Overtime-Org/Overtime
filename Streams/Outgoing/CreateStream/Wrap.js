@@ -6,7 +6,8 @@ import {
   useColorScheme,
   TouchableOpacity,
   ScrollView,
-  Modal
+  Modal,
+  ActivityIndicator
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { AntDesign } from '@expo/vector-icons';
@@ -21,6 +22,7 @@ const Wrap = ({modalVisible, setModalVisible}) => {
   const [wrapamount, setWrapamount] = useState('');
   const [disableadd, setDisableadd] = useState(false);
   const [skipapprove, setSkipapprove] = useState(false);
+  const [disablefinish, setDisablefinish] = useState(false);
 
   const { address } = useAccount()
 
@@ -38,33 +40,32 @@ const Wrap = ({modalVisible, setModalVisible}) => {
     chainId: celo.id
   });
 
+  //approve----
   useEffect(() => {
     if (disableadd == true) {
       const wrapamountstr = (wrapamount * 1000000000000000000).toString();
-      wrap0(wrapamountstr);
+      wrap0write.writeContract({
+        address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
+        abi: StableTokenV2,
+        functionName: 'approve',
+        chainId: celo.id,
+        args: ['0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e', wrapamountstr]
+      });
     }
-  }, [disableadd])
+  }, [disableadd]);
 
-  async function wrap0(amount) {
-    try {
-      if ((wrapamount * 1000000000000000000) <= queryresult.data) {
-        setSkipapprove(true);
-      }
-      else{
-        wrap0write.writeContract({
-          address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
-          abi: StableTokenV2,
-          functionName: 'approve',
-          chainId: celo.id,
-          args: ['0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e', amount]
-        })
+  useEffect(() => {
+    if (wrap0write.isPending == false) {
+      if (disableadd == true && wrap0write.isSuccess == false) {
+        setDisableadd(false);
       }
     }
-    catch (error) {}
-  }
+  }, [wrap0write.isPending]);
+  //approve----
 
-  async function wrap1() {
-    try {
+  //upgrade----
+  useEffect(() => {
+    if (disablefinish == true) {
       wrap1write.writeContract({
         address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
         abi: SuperToken,
@@ -73,7 +74,45 @@ const Wrap = ({modalVisible, setModalVisible}) => {
         args: [(wrapamount * 1000000000000000000).toString()]
       })
     }
-    catch (error) {}
+  }, [disablefinish]);
+
+  useEffect(() => {
+    if (wrap1write.isPending == false) {
+      if (disablefinish == true && wrap1write.isSuccess == false) {
+        setDisablefinish(false);
+        setDisableadd(false);
+      }
+    }
+  }, [wrap1write.isPending]);
+
+  useEffect(() => {
+    if (wrap1write.isSuccess == true) {
+      setDisablefinish(false);
+      setDisableadd(false);
+    }
+  }, [wrap1write.isSuccess]);
+  //upgrade----
+
+  async function wrap0(allowedamount) {
+    try {
+      if ((wrapamount * 1000000000000000000) <= allowedamount) {
+        setSkipapprove(true);
+      }
+      else {
+        setDisableadd(true);
+      }
+    }
+    catch (error) {setDisableadd(false)}
+  }
+
+  async function wrap1() {
+    try {
+      setDisablefinish(true);
+    }
+    catch (error) {
+      setDisablefinish(false);
+      setDisableadd(false);
+    }
   }
 
   const handleFocus = () => setIsFocused(true);
@@ -138,9 +177,25 @@ const Wrap = ({modalVisible, setModalVisible}) => {
                 <>
                   <Text style={{marginTop: 10, color: isDarkMode ? Colors.white : Colors.black}}>Finish adding {wrapamount} cUSDx</Text>
                   <TouchableOpacity
-                    style={{ marginTop: '10%', alignSelf: 'center', width: 95, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+                    style={{
+                      marginTop: '10%',
+                      alignSelf: 'center',
+                      width: 95,
+                      height: 40,
+                      backgroundColor: '#15D828',
+                      borderRadius: 10,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      opacity: disablefinish == true ? 0.6 : 1
+                    }}
+                    disabled={disablefinish}
                     onPress={() => wrap1()}>
-                    <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>FINISH</Text>
+                    {
+                      disablefinish == true ? 
+                        <ActivityIndicator size='small' color='white'/>
+                      :
+                        <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>FINISH</Text>
+                    }
                   </TouchableOpacity>
                 </>
               :
@@ -159,16 +214,30 @@ const Wrap = ({modalVisible, setModalVisible}) => {
                       keyboardType={'numeric'}
                     />
                   </View>
-
                   <TouchableOpacity
-                    style={{ marginTop: '10%', alignSelf: 'center', width: 95, height: 40, backgroundColor: '#15D828', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+                    style={{
+                      marginTop: '10%',
+                      alignSelf: 'center',
+                      width: 95,
+                      height: 40,
+                      backgroundColor: '#15D828',
+                      borderRadius: 10,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      opacity: disableadd == true ? 0.6 : 1
+                    }}
                     disabled={disableadd}
                     onPress={() => {
                       if (wrapamount.length > 0 && isNaN(Number(wrapamount)) == false) {
-                        queryresult.refetch().then(() => setDisableadd(true))
+                        queryresult.refetch().then((refetched) => wrap0(refetched.data))
                       }
                     }}>
-                    <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>ALLOW</Text>
+                    {
+                      disableadd == true ?
+                        <ActivityIndicator size='small' color='white'/>
+                      :
+                        <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }}>ALLOW</Text>
+                    }
                   </TouchableOpacity>
                 </>)
             }

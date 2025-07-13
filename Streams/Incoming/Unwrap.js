@@ -111,9 +111,13 @@ export default function Unwrap() {
     chainId: celo.id
   });
   
-  const { data, isSuccess, writeContract } = useWriteContract();
+  const { data, isSuccess, isError, writeContract } = useWriteContract();
 
-  
+  useEffect(() => {
+    if (isError == true) {
+      setAmount('');
+    }
+  }, [isError]);  
 
   useEffect(() => {
     if (isSuccess == true) {

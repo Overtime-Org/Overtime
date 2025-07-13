@@ -145,7 +145,7 @@ const SingleStream = ({route, connectionprop}) => {
     }
   }, [deleting]);
 
-  const {isSuccess, writeContract} = useWriteContract();
+  const {isSuccess, isError, writeContract} = useWriteContract();
   const updateflowwrite = useWriteContract();
   var querybalance = useReadContract({
     address: '0x3acb9a08697b6db4cd977e8ab42b6f24722e6d6e',
@@ -162,7 +162,10 @@ const SingleStream = ({route, connectionprop}) => {
       isDeleting(false);
       navigation.goBack();
     }
-  }, [isSuccess])
+    else if (isError == true) {
+      isDeleting(false);
+    }
+  }, [isSuccess, isError]);
   
   const isDarkMode = useColorScheme() === 'dark';
   const width1st = () => {
@@ -489,7 +492,7 @@ const SingleStream = ({route, connectionprop}) => {
           onPressIn={() => setStylestate('fill')}
           onPressOut={() => setStylestate('outline')}
           onPress={deleting ? () => {} : () => {isDeleting(true)}}>
-          <Text style={cancelstream}>CANCEL STREAM</Text>
+          {deleting == true ? <ActivityIndicator size={'small'} color='#FA0514'/> : <Text style={cancelstream}>CANCEL STREAM</Text>}
         </TouchableOpacity>}
       </View>
     </ScrollView>
