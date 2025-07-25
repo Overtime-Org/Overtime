@@ -1,8 +1,11 @@
 # Overtime
-### Requirement
-Install Valora from [here](https://play.google.com/store/apps/details?id=co.clabs.valora) and set up a wallet
+## Requirement
+A wallet that supports cUSD on Celo Mainnet
+### Recommended wallets
+[Valora](https://valora.xyz)<br/>
+[Metamask](https://metamask.io)
 
-### Running the app
+## Running the app
 Run these from terminal/cli
 
 ```git clone https://github.com/Overtime-Org/Overtime.git```
