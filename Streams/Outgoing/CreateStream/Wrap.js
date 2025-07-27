@@ -23,6 +23,8 @@ const Wrap = ({modalVisible, setModalVisible}) => {
   const [disableadd, setDisableadd] = useState(false);
   const [skipapprove, setSkipapprove] = useState(false);
   const [disablefinish, setDisablefinish] = useState(false);
+  const [approvedUI, setApprovedUI] = useState(false);
+  const [upgradedUI, setUpgradedUI] = useState(false);
 
   const { address } = useAccount()
 
@@ -61,6 +63,12 @@ const Wrap = ({modalVisible, setModalVisible}) => {
       }
     }
   }, [wrap0write.isPending]);
+
+  useEffect(() => {
+    if (wrap0write.isSuccess) {
+      setApprovedUI(true);
+    }
+  }, [wrap0write.isSuccess]);
   //approve----
 
   //upgrade----
@@ -89,6 +97,7 @@ const Wrap = ({modalVisible, setModalVisible}) => {
     if (wrap1write.isSuccess == true) {
       setDisablefinish(false);
       setDisableadd(false);
+      setUpgradedUI(true);
     }
   }, [wrap1write.isSuccess]);
   //upgrade----
@@ -159,6 +168,12 @@ const Wrap = ({modalVisible, setModalVisible}) => {
       visible={modalVisible}
       onRequestClose={() => {
         setModalVisible(false);
+        if (upgradedUI == true) {
+          setUpgradedUI(false);
+          setSkipapprove(false);
+          setApprovedUI(false);
+          setWrapamount('');
+        }
       }}>
       <View style={modal_swholescreenstyle}>
         <View style={modal_sinnerstyle}>
@@ -166,14 +181,20 @@ const Wrap = ({modalVisible, setModalVisible}) => {
             <TouchableOpacity
               style={{alignSelf: 'flex-end'}}
               onPress={() => {
-                setModalVisible(false)
+                setModalVisible(false);
+                if (upgradedUI == true) {
+                  setUpgradedUI(false);
+                  setSkipapprove(false);
+                  setApprovedUI(false);
+                  setWrapamount('');
+                }
               }}>
               <AntDesign name="close" size={25} color={isDarkMode ? Colors.light : Colors.black}/>
             </TouchableOpacity>
-            {wrap1write.isSuccess == true ? 
+            {upgradedUI ? 
               (<Text style={{marginTop: 10, color: isDarkMode ? Colors.white : Colors.black}}>{wrapamount} cUSDx added successfully</Text>)
             :
-              (wrap0write.isSuccess == true || skipapprove ?
+              (approvedUI || skipapprove ?
                 <>
                   <Text style={{marginTop: 10, color: isDarkMode ? Colors.white : Colors.black}}>Finish adding {wrapamount} cUSDx</Text>
                   <TouchableOpacity
